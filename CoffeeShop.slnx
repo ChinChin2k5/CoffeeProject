@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="CoffeeShop.API/CoffeeShop.API.csproj" />
+  <Project Path="CoffeeShop.Application/CoffeeShop.Application.csproj" />
+  <Project Path="CoffeeShop.Domain/CoffeeShop.Domain.csproj" />
+  <Project Path="CoffeeShop.Infrastructure/CoffeeShop.Infrastructure.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+</Solution>

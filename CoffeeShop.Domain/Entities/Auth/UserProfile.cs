@@ -1,0 +1,11 @@
+//UserId (Key), FullName, Phone, Avatar.
+namespace CoffeeShop.Domain.Entities.Auth
+{
+    public class UserProfile  
+    {
+        public int UserId { get; set; }
+        public string FullName { get; set; }
+        public string Phone { get; set; }
+        public string Avatar { get; set; }
+    }
+}
