@@ -13,5 +13,6 @@ namespace CoffeeShop.Domain.Entities.Auth
         public string LockoutEnd { get; set; }
         public int StoreId { get; set; }
         public virtual Store Store { get; set; }
+        public virtual UserProfile UserProfile { get; set; }
     }
 }

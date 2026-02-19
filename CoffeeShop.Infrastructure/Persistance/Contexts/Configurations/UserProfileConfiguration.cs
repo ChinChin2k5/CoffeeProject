@@ -1,24 +1,22 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MyCoffeeApp.Domain.Entities;
+using MyCoffeeApp.Domain.Entities.Auth;
 
 namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
 {
-    public class UserProfileConfiguration : IEntityTypeConfiguration<UserConfiguration>
+    public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
     {
-        public void Configure(EntityTypeBuilder<User> builder)
+        public void Configure(EntityTypeBuilder<UserProfile> builder)
         {
-            builder.ToTable("Users");
-            builder.HasKey(e => e.Id);
-            builder.Property(e => e.Username).IsRequired().HasMaxLength(50);
-            builder.Property(e => e.PasswordHash).IsRequired().HasMaxLength(500);
-            builder.Property(e => e.Role).IsRequired().HasMaxLength(10).HasDefaultValueSql("Staff");
-            builder.Property(e => e.FalledLoginAttempts).HasDefaultValue(0);
-            builder.Property(e => e.LockoutEnd).IsRequired(false); //Cho phép null
-            builder.HasOne(u => u.Store)
-                .WithMany(s => s.Users)
-                .HasForeignKey(u => u.StoreId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.ToTable("UserProfiles");
+            builder.HasKey(e => e.UserId);
+            builder.Property(e => e.FullName).IsRequired().HasMaxLength(50);
+            builder.Property(e => e.Phone).IsRequired().HasMaxLength(20);
+            builder.Property(e => e.Avatar).IsRequired().HasMaxLength(500);
+            builder.HasOne(u => u.Users)
+                   .WithOne(u => u.UserProfile)
+                   .HasForeignKey<UserProfile>(up => up.UserId)
+                   .OnDelete(DeleteBehaviour.Cascade);
         }
     }
 }
