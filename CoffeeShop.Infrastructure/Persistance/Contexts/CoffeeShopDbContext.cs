@@ -28,19 +28,8 @@ namespace CoffeeShop.Infrastructure.Persistence.Contexts
         {
             //Bước "lấy khung" của Bố 
             base.OnModelCreating(modelBuilder);
-            modeilBuilder.Entity<User>(entity => 
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(500);
-                entity.Property(e => e.Role).IsRequired().HasMaxLength(10).HasDefaultValueSql("Staff");
-                entity.Property(e => e.FalledLoginAttempts).HasDefaultValue(0);
-                entity.Property(e => e.LockoutEnd).IsRequired(false); //Cho phép null
-                entity.HasOne(u => u.Store)
-                      .WithMany(s => s.Users)
-                      .HasForeignKey(u => u.StoreId)
-                      .OnDelete(DeleteBehavior.Restrict);s
-            })
+            // Nó sẽ tự tìm tất cả các class kế thừa IEntityTypeConfiguration trong project này và nạp vào.
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }
 }
