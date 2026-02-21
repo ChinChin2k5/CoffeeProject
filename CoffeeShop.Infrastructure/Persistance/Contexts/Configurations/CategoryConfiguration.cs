@@ -14,10 +14,10 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
             builder.Property(e => e.Description).IsRequired().HasMaxLength(1000);
             builder.Property(e => e.DisplayOrder).IsRequired();
             builder.Property(e => e.IsActive).IsRequired();
-            builder.HasOne(u => u.Users)
-                   .WithOne(u => u.UserProfile)
-                   .HasForeignKey<UserProfile>(up => up.UserId)
-                   .OnDelete(DeleteBehaviour.Cascade);
+            builder.HasMany(u => u.Products)
+                   .WithOne(u => u.Category)
+                   .HasForeignKey(up => up.CategoryId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
