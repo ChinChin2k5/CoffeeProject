@@ -9,10 +9,11 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
         public void Configure(EntityTypeBuilder<Category> builder)
         {
             builder.ToTable("Categories");
-            builder.HasKey(e => e.UserId);
-            builder.Property(e => e.FullName).IsRequired().HasMaxLength(50);
-            builder.Property(e => e.Phone).IsRequired().HasMaxLength(20);
-            builder.Property(e => e.Avatar).IsRequired().HasMaxLength(500);
+            builder.HasKey(e => e.Id);
+            builder.Property(e => e.Name).IsRequired().HasMaxLength(50);
+            builder.Property(e => e.Description).IsRequired().HasMaxLength(1000);
+            builder.Property(e => e.DisplayOrder).IsRequired();
+            builder.Property(e => e.IsActive).IsRequired();
             builder.HasOne(u => u.Users)
                    .WithOne(u => u.UserProfile)
                    .HasForeignKey<UserProfile>(up => up.UserId)
