@@ -7,5 +7,6 @@ namespace CoffeeShop.Domain.Entities.Catalog
         public string Name { get; set; }
         public decimal Price { get; set; }
         public string Image { get; set; }
+        public virtual Category Category { get; set; }
     }
 }
