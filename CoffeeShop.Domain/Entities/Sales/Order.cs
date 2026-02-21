@@ -9,5 +9,6 @@ namespace CoffeeShop.Domain.Entities.Sales
         public int Status { get; set; }
         public int StaffId { get; set; }
         public int StoreId { get; set; }
+        public virtual Store Store { get; set; }
     }
 }

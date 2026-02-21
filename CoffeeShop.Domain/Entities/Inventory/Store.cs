@@ -8,5 +8,6 @@ namespace CoffeeShop.Domain.Entities.Inventory
         public string Address { get; set; }
         public string Hotline { get; set; }
         public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }

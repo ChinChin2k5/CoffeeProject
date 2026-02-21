@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MyCoffeeApp.Domain.Entities.Auth;
+using CoffeeShop.Domain.Entities.Inventory; // Sửa đúng chỗ
+using CoffeeShop.Domain.Entities.Sales;     // Sửa đúng chỗ
 
 namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
 {
@@ -9,14 +10,14 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
         public void Configure(EntityTypeBuilder<Store> builder)
         {
             builder.ToTable("Stores");
-            builder.HasKey(e => e.UserId);
-            builder.Property(e => e.FullName).IsRequired().HasMaxLength(50);
-            builder.Property(e => e.Phone).IsRequired().HasMaxLength(20);
-            builder.Property(e => e.Avatar).IsRequired().HasMaxLength(500);
-            builder.HasOne(u => u.Users)
-                   .WithOne(u => u.UserProfile)
-                   .HasForeignKey<UserProfile>(up => up.UserId)
-                   .OnDelete(DeleteBehaviour.Cascade);
+            builder.HasKey(s => s.Id);
+            builder.Property(s => s.StoreName).IsRequired().HasMaxLength(30);
+            builder.Property(s => s.Address).IsRequired().HasMaxLength(100);
+            builder.Property(s => s.Hotline).IsRequired().HasMaxLength(20);
+            builder.HasMany(s => s.Orders)
+                   .WithOne(o => o.Store)
+                   .HasForeignKey(o => o.StoreId)
+                   .OnDelete(DeleteBehaviour.Restrict);
         }
     }
 }
