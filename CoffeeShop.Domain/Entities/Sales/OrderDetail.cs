@@ -6,6 +6,6 @@ namespace CoffeeShop.Domain.Entities.Sales
         public int ProductId {get; set;}
         public int Quantity {get; set;}
         public decimal Price {get; set;}
-        public Guid ParentOrderDetailId {get; set;}
+        public Guid? ParentOrderDetailId {get; set;}
     }
 }

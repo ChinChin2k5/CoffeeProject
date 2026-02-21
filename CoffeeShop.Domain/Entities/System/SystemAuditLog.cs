@@ -4,8 +4,8 @@ namespace CoffeeShop.Domain.Entities.System
     {
         public int Id {get; set;}
         public string Action {get; set;}
-        public string Descrption {get; set;}
+        public string Description {get; set;}
         public int UserId {get; set;}
-        public string CreateDate {get; set;}
+        public DateTime CreateDate {get; set;}
     }
 }

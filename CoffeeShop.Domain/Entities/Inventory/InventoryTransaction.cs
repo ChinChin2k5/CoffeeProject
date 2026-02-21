@@ -9,6 +9,6 @@ namespace CoffeeShop.Domain.Entities.Inventory
         public string TransactionType { get; set; }
         public string Reason { get; set; }
         public string CreateBy { get; set; }
-        public string CreateDate { get; set; }
+        public DateTime CreateDate { get; set; }
     }
 }

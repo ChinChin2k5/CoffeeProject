@@ -9,9 +9,9 @@ namespace CoffeeShop.Domain.Entities.Auth
         public string Username { get; set; }
         public string PasswordHash { get; set; }
         public string Role { get; set; }
-        public int FalledLoginAttempts { get; set;}
-        public string LockoutEnd { get; set; }
-        public int StoreId { get; set; }
+        public int FailedLoginAttempts { get; set;}
+        public DateTime? LockoutEnd { get; set; }
+        public int? StoreId { get; set; }
         public virtual Store Store { get; set; }
         public virtual UserProfile UserProfile { get; set; }
     }

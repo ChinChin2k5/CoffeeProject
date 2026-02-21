@@ -5,6 +5,6 @@ namespace CoffeeShop.Domain.Entities.Catalog
     {
         public int ProductId { get; set; }
         public int IngredientId { get; set; }
-        public int QuantityNeeded { get; set; }
+        public decimal QuantityNeeded { get; set; }
     }
 }
