@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Định nghĩa hệ màu SPECIALZ tại đây */
+@theme {
+  --color-specialz-brown: #3E2723;
+  --color-specialz-bg: #FDF8F5;
+}
+
+body {
+  background-color: var(--color-specialz-bg);
+}
