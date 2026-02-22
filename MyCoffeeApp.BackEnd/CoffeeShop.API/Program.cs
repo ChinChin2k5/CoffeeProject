@@ -1,62 +1,25 @@
-using CoffeeShop.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// 1. Cấp thẻ xanh (CORS Policy) cho cổng 5173 của Vite React
-builder.Services.AddCors(options =>
+namespace CoffeeShop.API.Controllers
 {
-    options.AddPolicy("AllowReactApp", policy =>
+    [Route("api/[controller]")] // Tự động biến thành /api/auth
+    [ApiController]
+    public class AuthController : ControllerBase
     {
-        policy.WithOrigins("http://localhost:5173") // ĐÚNG CỔNG CỦA FRONTEND NHÉ!
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-builder.Services.AddInfrastructure(builder.Configuration);
-
-
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// 2. Kích hoạt bảo vệ mở cổng (Lưu ý: Phải đặt TRƯỚC app.UseAuthorization())
-app.UseCors("AllowReactApp");
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        public class LoginRequest
+        {
+            public string Username { get; set; } = string.Empty;
+            public string Password { get; set; } = string.Empty;
+        }
+        
+        [HttpPost("login")] // Đường dẫn đầy đủ sẽ là: POST /api/auth/login
+        public IActionResult Login([FromBody] LoginRequest request)
+        {
+            if (request.Username == "admin" && request.Password == "123456")
+            {
+                return Ok(new { message = "Đăng nhập thành công !", role = "Admin"});
+            }
+            return Unauthorized(new {message = "Sai tài khoản hoặc mật khẩu !" });
+        }
+    }
 }

@@ -1,25 +1,44 @@
-using Microsoft.AspNetCore.Mvc;
+using CoffeeShop.Infrastructure;
 
-namespace CoffeeShop.API.Controllers
+var builder = WebApplication.CreateBuilder(args);
+
+// 1. Cấp thẻ xanh (CORS Policy) cho cổng 5173 của Vite React
+builder.Services.AddCors(options =>
 {
-    [Route("api/[controller]")] // Tự động biến thành /api/auth
-    [ApiController]
-
-    public class AuthController : ControllerBase
+    options.AddPolicy("AllowReactApp", policy =>
     {
-        public class LoginRequest
-        {
-            public string Username { get; set; } = string.Empty;
-            public string Password { get; set; } = string.Empty;
-        }
-        [HttpPost("login")] // Đường dẫn đầy đủ sẽ là: POST /api/auth/login
-        public IActionResult Login([FromBody] LoginRequest request)
-        {
-            if (request.Username == "admin" && request.Password == "123456")
-            {
-                return Ok(new { message = "Đăng nhập thành công !", role = "Admin"});
-            }
-            return Unauthorized(new {message = "Sai tài khoản hoặc mật khẩu !" });
-        }
-    }
+        policy.WithOrigins("http://localhost:5173") // ĐÚNG CỔNG CỦA FRONTEND NHÉ!
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
+// THÊM DÒNG NÀY: Khai báo cho C# biết là "Tao có xài Controller nhé!"
+builder.Services.AddControllers(); 
+
+// Add services to the container.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// 2. Kích hoạt bảo vệ mở cổng
+app.UseCors("AllowReactApp");
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+
+// THÊM DÒNG NÀY VÀO ĐÂY: Mở đường cho API chui vào AuthController
+app.MapControllers(); 
+
+// (Đoạn weatherforecast rác Đại ca đã dọn đi cho sạch nhà luôn rồi nhé)
+
+app.Run();
