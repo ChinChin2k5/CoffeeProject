@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+/*using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using CoffeeShop.Domain.Entities.Inventory; // Sửa đúng chỗ
 using CoffeeShop.Domain.Entities.Sales;     // Sửa đúng chỗ
@@ -20,4 +20,4 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
                    .OnDelete(DeleteBehaviour.Restrict);
         }
     }
-}
+}*/

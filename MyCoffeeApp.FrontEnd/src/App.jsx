@@ -1,6 +1,31 @@
+import { useState } from 'react';
 import './index.css';
 
 function App() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://localhost:5269/swagger/index.html', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application.json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
+    }
+    const data = await response.json();
+    if (response.ok) {
+      alert("Bao Cao: " + data.message);
+    }
+    else {
+      alert("No roi cac chau oi chay di: " + data.message);
+    }
+    
+  }
   return (
     //Kích hoạt flex + toàn màn hình h-screen + căn giữa chiều dọc chiều ngang
     <div className = "flex h-screen items-center justify-center flex-col">

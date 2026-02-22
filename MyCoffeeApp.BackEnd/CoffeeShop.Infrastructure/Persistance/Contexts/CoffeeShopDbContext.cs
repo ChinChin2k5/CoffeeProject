@@ -7,7 +7,7 @@ using CoffeeShop.Domain.Entities.System;
 
 namespace CoffeeShop.Infrastructure.Persistence.Contexts
 {
-    public class CoffeeShopDbContext : DbContext
+    /*public class CoffeeShopDbContext : DbContext
     {
         public CoffeeShopDbContext(DbContextOptions<CoffeeShopDbContext> options) : base(options)
         {}
@@ -31,5 +31,5 @@ namespace CoffeeShop.Infrastructure.Persistence.Contexts
             // Nó sẽ tự tìm tất cả các class kế thừa IEntityTypeConfiguration trong project này và nạp vào.
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
-    }
+    }*/
 }

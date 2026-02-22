@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+/*using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MyCoffeeApp.Domain.Entities.Auth;
+using CoffeeShop.Domain.Entities.Sales;
 
 namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
 {
@@ -19,4 +19,4 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
                    .OnDelete(DeleteBehaviour.Cascade);
         }
     }
-}
+}*/

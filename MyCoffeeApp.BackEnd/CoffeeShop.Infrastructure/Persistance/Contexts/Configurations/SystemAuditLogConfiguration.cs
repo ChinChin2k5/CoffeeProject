@@ -1,12 +1,12 @@
-using Microsoft.EntityFrameworkCore;
+/*using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MyCoffeeApp.Domain.Entities.Auth;
+using CoffeeShop.Domain.Entities.System;
 
 namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
 {
     public class SystemAuditLogConfiguration : IEntityTypeConfiguration<SystemAuditLog>
     {
-        public void Configure(EntityTypeBuilder<SystemAuditlog> builder)
+        public void Configure(EntityTypeBuilder<SystemAuditLog> builder)
         {
             builder.ToTable("SystemAuditLogs");
             builder.HasKey(e => e.UserId);
@@ -19,4 +19,4 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
                    .OnDelete(DeleteBehaviour.Cascade);
         }
     }
-}
+}*/

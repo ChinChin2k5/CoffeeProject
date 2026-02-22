@@ -1,12 +1,12 @@
-using Microsoft.EntityFrameworkCore;
+/*using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MyCoffeeApp.Domain.Entities.Auth;
+using CoffeeShop.Domain.Entities.Sales;
 
 namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
 {
     public class OrderDetailConfiguration : IEntityTypeConfiguration<OrderDetail>
     {
-        public void Configure(EntityTypeBuilder<UserProfile> builder)
+        public void Configure(EntityTypeBuilder<OrderDetail> builder)
         {
             builder.ToTable("OrderDetails");
             builder.HasKey(e => e.UserId);
@@ -19,4 +19,4 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
                    .OnDelete(DeleteBehaviour.Cascade);
         }
     }
-}
+}*/

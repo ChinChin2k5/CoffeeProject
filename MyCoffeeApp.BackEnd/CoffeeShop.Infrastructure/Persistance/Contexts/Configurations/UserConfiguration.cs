@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MyCoffeeApp.Domain.Entities;
+using CoffeeShop.Domain.Entities.Auth;
 
 namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
 {
@@ -8,7 +8,7 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.ToTable("Users");
+            /*builder.ToTable("Users");
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Username).IsRequired().HasMaxLength(50);
             builder.Property(e => e.PasswordHash).IsRequired().HasMaxLength(500);
@@ -18,7 +18,7 @@ namespace MyCoffeeApp.Infrastructure.Persistence.Contexts.Configurations
             builder.HasOne(u => u.Store)
                 .WithMany(s => s.Users)
                 .HasForeignKey(u => u.StoreId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);*/
         }
     }
 }
