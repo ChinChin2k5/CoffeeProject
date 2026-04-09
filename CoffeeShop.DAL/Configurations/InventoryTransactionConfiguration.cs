@@ -1,0 +1,28 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using CoffeeShop.Models.Entities.Inventory;
+
+namespace CoffeeShop.DAL.Configurations
+{
+    public class InventoryTransactionConfiguration : IEntityTypeConfiguration<InventoryTransaction>
+    {
+        public void Configure(EntityTypeBuilder<InventoryTransaction> builder)
+        {
+            builder.ToTable("InventoryTransactions");
+            builder.HasKey(e => e.Id);    
+            builder.HasForeignKey(e => e.IngredientId);
+            builder.Property(e => e.QuantityChange).IsRequired();
+            builder.Property(e => e.TransactionType).IsRequired().HasMaxLength(100);
+            builder.Property(e => e.Reason).IsRequired().HasMaxLength(200);
+            builder.Property(e => e.CreateBy).IsRequired();
+            //Liên kết 1 Store nhiều InventoryTransactions
+            builder.HasOne(e => e.Store)
+                   .WithMany(e => e.InventoryTransactions)
+                   .HasForeignKey(e => e.StoreId);
+            //Liên kết 1 Ingredient nhiều InventoryTransactions
+            builder.HasOne(e => e.Ingredient)
+                   .WithMany(e => e.InventoryTransactions)
+                   .HasForeignKey(e => e.IngredientId);
+        }
+    }
+}

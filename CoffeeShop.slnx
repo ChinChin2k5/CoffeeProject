@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CoffeeShop.API/CoffeeShop.API.csproj" />
+  <Project Path="CoffeeShop.BLL/CoffeeShop.BLL.csproj" />
+  <Project Path="CoffeeShop.DAL/CoffeeShop.DAL.csproj" />
+  <Project Path="CoffeeShop.Models/CoffeeShop.Models.csproj" />
+</Solution>

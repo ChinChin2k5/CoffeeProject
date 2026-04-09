@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Đăng Nhập</title>
+        <link rel="stylesheet" href="../dist/output.css">
+    </head>
+    <body class = "flex items-center justify-center min-h-screen">
+        <form id = "loginForm" autocomplete="off">
+            <div>
+                <p>Email Của Bạn</p>
+                <input 
+                  id = "email"
+                  type="text"
+                  placeholder="nv@email.com"
+                />
+                <p id="blankEmailError" class="hidden text-red-500">
+                    Email Đang Bị Để Trống !
+                </p>
+                <p id="formatEmailError" class="hidden text-red-500">
+                    Email Sai Định Dạng
+                </p>
+            </div>
+            <div>
+                <p>Mật Khẩu Của Bạn</p>
+                <input 
+                  id = "password"
+                  type = "password"
+                  placeholder="Nhập mật khẩu vào đây..."
+                />
+                <p id="blankPasswordError" class="hidden text-red-500">
+                    Mật Khẩu Đang Bị Để Trống !
+                </p>
+                <p id="minimumPasswordError" class="hidden text-red-500">
+                    Mật Khẩu Phải Có Tối Thiểu 8 Ký Tự
+                </p>
+            </div>
+            <button type="submit">Đăng Nhập</button>
+        </form>
+        <script src="../js/login.js"></script>
+    </body>
+</html>
