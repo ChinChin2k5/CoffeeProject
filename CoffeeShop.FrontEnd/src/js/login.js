@@ -23,8 +23,6 @@ loginForm.addEventListener('submit', (e) => {
         isValid = false;
     }
     else if (!emailRegex.test(emailValue)) {
-        // Nếu hàm test() trả về false (nghĩa là chuỗi đút vào không khớp với Regex)
-        // Thì bung thông báo lỗi định dạng ra!
         formatEmailError.classList.remove('hidden');
         isValid = false;
     }

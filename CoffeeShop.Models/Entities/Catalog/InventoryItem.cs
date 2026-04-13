@@ -1,6 +1,6 @@
 namespace CoffeeShop.Models.Entities.Catalog
 {
-    public class Ingredient 
+    public class InventoryItem 
     {
         public int Id { get; set; }
         public string Name { get; set; }

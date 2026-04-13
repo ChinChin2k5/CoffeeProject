@@ -10,7 +10,7 @@ namespace CoffeeShop.DAL.Configurations
         {
             builder.ToTable("InventoryTransactions");
             builder.HasKey(e => e.Id);    
-            builder.HasForeignKey(e => e.IngredientId);
+            builder.HasForeignKey(e => e.ItemId);
             builder.Property(e => e.QuantityChange).IsRequired();
             builder.Property(e => e.TransactionType).IsRequired().HasMaxLength(100);
             builder.Property(e => e.Reason).IsRequired().HasMaxLength(200);
@@ -22,7 +22,7 @@ namespace CoffeeShop.DAL.Configurations
             //Liên kết 1 Ingredient nhiều InventoryTransactions
             builder.HasOne(e => e.Ingredient)
                    .WithMany(e => e.InventoryTransactions)
-                   .HasForeignKey(e => e.IngredientId);
+                   .HasForeignKey(e => e.ItemId);
         }
     }
 }
