@@ -1,25 +1,96 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CoffeeShop.DAL.Data; // Chứa CafeDBContext của em
+using CoffeeShop.DAL.Data; // Chỉnh lại cho đúng namespace chứa CafeDBContext của em
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. GIAI ĐOẠN CHUẨN BỊ (ĐĂNG KÝ DỊCH VỤ) ---
+// --- 1. ĐĂNG KÝ CỔNG ---
+builder.Services.AddControllers();
+// Lấy thông tin cấu hình JWT từ file appsetiings.json
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"];
 
+if (string.IsNullOrEmpty(secretKey))
+{
+    throw new InvalidOperationException("Secret Key của JWT chưa được cấu hình, không thể chạy app!");
+}
+// 2. Cấu hình Authentication Service với JWT Bearer
+builder.Services.AddAuthentication(options =>
+{
+    // Đặt mặc định khi API nhận request sẽ dùng cơ chế JWT Bearer để check
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    // Định nghĩa các quy tắc để kiểm tra xem Token gửi lên có hợp lệ không
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,         // Kiểm tra xem Token có đúng do Server mình phát hành không
+        ValidateAudience = true,       // Kiểm tra xem Token có gửi đúng đến Client được phép không
+        ValidateLifetime = true,       // Kiểm tra xem Token còn hạn sử dụng không
+        ValidateIssuerSigningKey = true, // Kiểm tra chữ ký bảo mật để tránh Token giả mạo
+
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        
+        // "Bẫy" Junior hay dính: Mặc định .NET Core sẽ cộng thêm 5 phút bù trừ chênh lệch thời gian (ClockSkew).
+        // Đặt về Zero để Token hết hạn chính xác từng giây theo cấu hình.
+        ClockSkew = TimeSpan.Zero 
+    };
+});
+// 3. Cấu hình Authorization Service (Phân quyền nâng cao bằng Policy)
+builder.Services.AddAuthorization(options =>
+{
+    // Tạo một Policy tên là "AdminOnly", bắt buộc user phải có Role là "Admin"
+    // "Role" là một Claims đặc biệt
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Admin","Manager"));
+    options.AddPolicy("Staff", policy => policy.RequireRole("Admin","Manager","Staff"));
+});
+
+builder.Services.AddCors(options => 
+{
+    options.AddPolicy("AllowViteApp", policy => 
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod(); //Cho phép thích làm gì thì làm
+    });
+});
+// Đăng ký Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Bắt bug: Đổi AppDbContext thành CafeDBContext cho khớp với file nãy em tạo
-builder.Services.AddDbContext<CafeDBContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-builder.Services.AddControllers();
+// 👇 ĐÂY LÀ ĐOẠN EM HAY QUÊN: Đăng ký Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// --- 2. GIAI ĐOẠN ĐÓNG GÓI (LỆNH BULD EM VỪA PHÁT HIỆN) ---
 var app = builder.Build();
 
-// --- 3. GIAI ĐOẠN CẤU HÌNH LUỒNG ĐI (MIDDLEWARE) ---
-// Thằng này cực kỳ quan trọng, không có nó thì API không biết Route đường dẫn đi đâu
+// --- 2. CẤU HÌNH LUỒNG ĐI (MIDDLEWARE) ---
+
+// 👇 BẬT CÔNG TẮC SWAGGER Ở ĐÂY
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(); // Mặc định nó sẽ tự tìm đến /swagger
+}
+//Cho phép riêng cổng 5173 được chạy cùng cổng 5079 của backend
+app.UseCors("AllowViteApp"):
+
+app.UseHttpsRedirection();
+// Trả lời câu hỏi bạn là ai (Xác thực)
+app.UseAuthentication();
+// Trả lời câu hỏi bạn làm được gì (Phân quyền)
+app.UseAuthorization(); 
+
+
 app.MapControllers(); 
 
-// --- 4. BẤM NÚT START ĐỘNG CƠ ---
+// --- 3. KHỞI CHẠY ---
 app.Run();
