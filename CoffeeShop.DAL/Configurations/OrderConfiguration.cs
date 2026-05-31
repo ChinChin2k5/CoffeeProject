@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using CoffeeShop.Models.Entities.Sales;
+using CoffeeShop.Models.Entities.Auth;
 
 namespace CoffeeShop.DAL.Configurations
 {
@@ -10,13 +11,15 @@ namespace CoffeeShop.DAL.Configurations
         {
             builder.ToTable("Orders");
             builder.HasKey(e => e.Id);
-            builder.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("GETDATE()");
+            builder.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
             builder.Property(e => e.TotalAmount).IsRequired().HasColumnType("decimal(18,2)");
             builder.Property(e => e.PaymentMethod).IsRequired().HasMaxLength(50);
-            builder.HasOne(u => u.Users)
-                   .WithOne(u => u.UserProfile)
-                   .HasForeignKey<UserProfile>(up => up.UserId)
-                   .OnDelete(DeleteBehaviour.Cascade);
+            // Mapping quan hệ 1-N chuẩn sách giáo khoa
+            builder.HasMany(o => o.OrderDetails)
+                   .WithOne(od => od.Order) // Điền rõ navigation property vào đây
+                   .HasForeignKey(od => od.OrderId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
+
     }
 }

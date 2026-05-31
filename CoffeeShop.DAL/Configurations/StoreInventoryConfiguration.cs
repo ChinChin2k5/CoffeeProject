@@ -9,14 +9,9 @@ namespace CoffeeShop.DAL.Configurations
         public void Configure(EntityTypeBuilder<StoreInventory> builder)
         {
             builder.ToTable("StoreInventories");
-            builder.HasKey(e => e.UserId);
-            builder.Property(e => e.FullName).IsRequired().HasMaxLength(50);
-            builder.Property(e => e.Phone).IsRequired().HasMaxLength(20);
-            builder.Property(e => e.Avatar).IsRequired().HasMaxLength(500);
-            builder.HasOne(u => u.Users)
-                   .WithOne(u => u.UserProfile)
-                   .HasForeignKey<UserProfile>(up => up.UserId)
-                   .OnDelete(DeleteBehaviour.Cascade);
+            builder.HasKey(e => e.StoreId);
+            builder.Property(e => e.ItemId).IsRequired();
+            builder.Property(e => e.Quantity).IsRequired();
         }
     }
 }

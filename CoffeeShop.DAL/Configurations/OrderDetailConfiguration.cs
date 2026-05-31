@@ -9,14 +9,14 @@ namespace CoffeeShop.DAL.Configurations
         public void Configure(EntityTypeBuilder<OrderDetail> builder)
         {
             builder.ToTable("OrderDetails");
-            builder.HasKey(e => e.UserId);
-            builder.Property(e => e.FullName).IsRequired().HasMaxLength(50);
-            builder.Property(e => e.Phone).IsRequired().HasMaxLength(20);
-            builder.Property(e => e.Avatar).IsRequired().HasMaxLength(500);
-            builder.HasOne(u => u.Users)
-                   .WithOne(u => u.UserProfile)
-                   .HasForeignKey<UserProfile>(up => up.UserId)
-                   .OnDelete(DeleteBehaviour.Cascade);
+            // 1. Trả lại vị trí Khóa Chính cho Id
+            builder.HasKey(e => e.Id); 
+            
+            // 2. OrderId hạ cấp xuống làm thuộc tính bắt buộc (Khóa ngoại)
+            builder.Property(e => e.OrderId).IsRequired();
+            builder.Property(e => e.ProductId).IsRequired();
+            builder.Property(e => e.Quantity).IsRequired();
+            builder.Property(e => e.Price).IsRequired().HasColumnType("decimal(18,2)");
         }
     }
 }

@@ -5,5 +5,6 @@ namespace CoffeeShop.Models.Entities.Catalog
         public int ProductId { get; set; }
         public int ItemId { get; set; }
         public decimal QuantityNeeded { get; set; }
+        public virtual InventoryItem InventoryItem { get; set; }
     }
 }

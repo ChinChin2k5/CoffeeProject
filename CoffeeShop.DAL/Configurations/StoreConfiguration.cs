@@ -17,7 +17,11 @@ namespace CoffeeShop.DAL.Configurations
             builder.HasMany(s => s.Orders)
                    .WithOne(o => o.Store)
                    .HasForeignKey(o => o.StoreId)
-                   .OnDelete(DeleteBehaviour.Restrict);
+                   .OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(s => s.StoreInventories)
+                   .WithOne(o => o.Store)
+                   .HasForeignKey(o => o.StoreId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Coffee Shop Management</title>
+    <link rel="stylesheet" href="/src/dist/output.css"> 
+    <script src="https://cdn.tailwindcss.com"></script> </head>
+<body class="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+
+    <div class="absolute inset-0 opacity-5 pointer-events-none">
+        <div class="absolute top-10 left-10 text-8xl">☕</div>
+        <div class="absolute bottom-20 right-20 text-8xl">☕</div>
+        <div class="absolute top-1/2 left-1/4 text-6xl">☕</div>
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
+        <div class="flex justify-center mb-8">
+            <div id="shop-logo" class="cursor-pointer select-none w-24 h-24 bg-gradient-to-br from-amber-700 to-amber-900 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-200">
+                <svg class="w-14 h-14 text-amber-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 1v3M10 1v3M14 1v3"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-amber-900 mb-2">Welcome to our shop</h1>
+            <p class="text-amber-700/80 text-sm">Vui lòng đăng nhập để bắt đầu ca làm việc.</p>
+        </div>
+
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-amber-100">
+            <div class="mb-6">
+                <div class="flex gap-3">
+                    <button id="btn-staff" type="button" class="flex-1 py-2.5 rounded-xl font-semibold transition-all bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg scale-105" onclick="selectRole('staff')">Nhân Viên</button>
+                    <button id="btn-manager" type="button" class="flex-1 py-2.5 rounded-xl font-semibold transition-all bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200" onclick="selectRole('manager')">Quản Lý</button>
+                </div>
+                <input type="hidden" id="selected-role" value="staff">
+            </div>
+
+            <form id="loginForm" autocomplete="off" class="space-y-4">
+                
+                <div>
+                    <label class="block text-sm font-semibold text-amber-900 mb-1">Email Của Bạn</label>
+                    <input id="email" type="text" placeholder="nv@email.com" class="w-full px-4 py-3 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white/50 transition-colors">
+                    <p id="blankEmailError" class="hidden text-xs text-red-500 mt-1 font-medium italic">❌ Email đang bị để trống!</p>
+                    <p id="formatEmailError" class="hidden text-xs text-red-500 mt-1 font-medium italic">❌ Email sai định dạng (ví dụ: a@b.c)!</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-amber-900 mb-1">Mật Khẩu</label>
+                    <div class="relative">
+                        <input id="password" type="password" placeholder="Nhập mật khẩu vào đây..." class="w-full pl-4 pr-10 py-3 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white/50 transition-colors">
+                        <button type="button" onclick="togglePassword('password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-amber-600">👁️</button>
+                    </div>
+                    <p id="blankPasswordError" class="hidden text-xs text-red-500 mt-1 font-medium italic">❌ Mật khẩu đang bị để trống!</p>
+                    <p id="minimumPasswordError" class="hidden text-xs text-red-500 mt-1 font-medium italic">❌ Mật khẩu phải có tối thiểu 8 ký tự!</p>
+                </div>
+
+                <div class="flex justify-end mb-2">
+                    <button type="button" class="text-xs text-amber-700 hover:text-amber-900 font-semibold underline">Quên mật khẩu?</button>
+                </div>
+
+                <button id = "btn-login" type="submit" class="w-full py-3 bg-gradient-to-r from-amber-700 to-amber-900 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-transform transform hover:-translate-y-0.5">
+                    Đăng Nhập
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 rounded-2xl p-8 max-w-sm w-full border border-slate-700 shadow-2xl">
+            <h2 class="text-xl font-bold text-red-500 text-center mb-4">KHU VỰC QUẢN TRỊ VIÊN</h2>
+            <input type="password" id="admin-key" placeholder="Nhập mã bí mật..." class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white mb-4 focus:outline-none focus:border-red-500">
+            <div class="flex gap-3">
+                <button onclick="closeAdminModal()" class="flex-1 py-2 bg-slate-700 text-white rounded-lg">Hủy</button>
+                <button class="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold">Truy cập</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/js/login.js"></script>
+</body>
+</html>

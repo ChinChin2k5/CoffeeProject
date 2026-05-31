@@ -15,7 +15,7 @@ namespace CoffeeShop.Models.Entities.Inventory
         public int CreateBy { get; set; }
         public DateTime CreateDate { get; set; } = DateTime.UtcNow;
         public virtual Store Store { get; set; }
-        public virtual Ingredient Ingredient{ get; set; }
+        public virtual InventoryItem InventoryItem{ get; set; }
         public virtual Auth.User User { get; set; }
     }
 }

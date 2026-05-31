@@ -1,13 +1,17 @@
 using Microsoft.EntityFrameworkCore;
-using CoffeeShop.DAL.Data; // Chỉnh lại cho đúng namespace chứa CafeDBContext của em
+using CoffeeShop.DAL; // Chỉnh lại cho đúng namespace chứa CafeDBContext của em
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+//Chống bruteforce
+using Microsoft.AspNetCore.RateLimiting;
+using CoffeeShop.BLL.BruteForceter;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. ĐĂNG KÝ CỔNG ---
 builder.Services.AddControllers();
+builder.Services.AddScoped<AgainstBruteForce>();
 // Lấy thông tin cấu hình JWT từ file appsetiings.json
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
@@ -39,7 +43,15 @@ builder.Services.AddAuthentication(options =>
         
         // "Bẫy" Junior hay dính: Mặc định .NET Core sẽ cộng thêm 5 phút bù trừ chênh lệch thời gian (ClockSkew).
         // Đặt về Zero để Token hết hạn chính xác từng giây theo cấu hình.
-        ClockSkew = TimeSpan.Zero 
+        ClockSkew = TimeSpan.Zero, 
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            context.Token = context.Request.Cookies["accessToken"];
+            return Task.CompletedTask;
+        }
     };
 });
 // 3. Cấu hình Authorization Service (Phân quyền nâng cao bằng Policy)
@@ -51,43 +63,51 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Admin","Manager"));
     options.AddPolicy("Staff", policy => policy.RequireRole("Admin","Manager","Staff"));
 });
-
+builder.Services.AddRateLimiter(options => 
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("fixed",fixedOptions => {
+        fixedOptions.PermitLimit = 5;
+        fixedOptions.Window = TimeSpan.FromSeconds(10);
+    });
+});
 builder.Services.AddCors(options => 
 {
     options.AddPolicy("AllowViteApp", policy => 
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyMethod(); //Cho phép thích làm gì thì làm
+              .AllowAnyMethod() //Cho phép thích làm gì thì làm
+              .AllowCredentials(); //Cho phép Client gửi Cookie lên Server
     });
 });
+
 // Đăng ký Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 👇 ĐÂY LÀ ĐOẠN EM HAY QUÊN: Đăng ký Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// --- 2. CẤU HÌNH LUỒNG ĐI (MIDDLEWARE) ---
 
-// 👇 BẬT CÔNG TẮC SWAGGER Ở ĐÂY
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(); // Mặc định nó sẽ tự tìm đến /swagger
 }
 //Cho phép riêng cổng 5173 được chạy cùng cổng 5079 của backend
-app.UseCors("AllowViteApp"):
+app.UseCors("AllowViteApp");
 
 app.UseHttpsRedirection();
+// Gọi hàm chống bruteforce
+app.UseRateLimiter();
 // Trả lời câu hỏi bạn là ai (Xác thực)
 app.UseAuthentication();
 // Trả lời câu hỏi bạn làm được gì (Phân quyền)
-app.UseAuthorization(); 
+app.UseAuthorization();
 
 
 app.MapControllers(); 

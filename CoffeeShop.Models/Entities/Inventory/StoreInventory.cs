@@ -5,5 +5,6 @@ namespace CoffeeShop.Models.Entities.Inventory
         public int StoreId { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
+        public virtual Store Store { get; set; }
     }
 }
