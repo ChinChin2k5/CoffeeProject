@@ -1,12 +1,167 @@
 <!DOCTYPE html>
 <html lang="vi">
-    <head>
-        <meta charset="UTF-8">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Staff Dashboard</title>
-    </head>
-    <body>
-        <h1>Đây là Staff</h1>
-    </body>
-    <button type="button">Đăng Xuất</button>
+    <title>MyCafe POS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden flex flex-col">
+
+    <!-- ========================================== -->
+    <!-- HEADER: GỌN GÀNG, SẠCH SẼ                   -->
+    <!-- ========================================== -->
+    <header class="bg-white shadow-sm flex items-center justify-between px-6 py-4 border-b">
+        <div class="flex items-center gap-3">
+            <!-- Icon Logo -->
+            <div class="bg-amber-500 text-white p-2 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">Quán Cà Phê</h1>
+                <p class="text-sm text-gray-500">Nhân Viênn</p>
+            </div>
+        </div>
+        
+        <!-- Đưa nút Logout lên góc phải -->
+        <button id="btnLogout" class="flex items-center gap-2 text-red-600 hover:text-red-800 font-semibold transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            Đăng Xuất
+        </button>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT: CHIA 2 CỘT (MENU & CART)      -->
+    <!-- ========================================== -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- CỘT TRÁI: DANH SÁCH SẢN PHẨM (Khu vực order) -->
+        <div class="w-2/3 p-6 overflow-y-auto">
+            <!-- Filter Tabs -->
+            <div class="flex gap-2 mb-6">
+                <button class="px-4 py-2 bg-amber-500 text-white font-semibold rounded-lg shadow">Tất Cả</button>
+                <button class="px-4 py-2 bg-white border text-gray-600 rounded-lg shadow-sm hover:bg-gray-50">Cà Phê Nóng</button>
+            </div>
+            
+            <!-- Danh sách món (Ví dụ) -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition">
+                    <div class="bg-amber-100 h-32 rounded-lg mb-4 flex items-center justify-center">☕️</div>
+                    <h3 class="font-bold text-gray-800">Espresso</h3>
+                    <p class="text-amber-600 font-bold mt-1">$3.50</p>
+                </div>
+                <!-- Copy thêm các món khác vào đây... -->
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: HÓA ĐƠN (Current Order) -->
+        <div class="w-1/3 bg-white border-l flex flex-col">
+            <div class="p-6 border-b flex-1">
+                <h2 class="text-xl font-bold text-gray-800 mb-1">Current Order</h2>
+                <p class="text-sm text-gray-500 mb-4">2 items</p>
+                
+                <!-- Item trong giỏ -->
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Espresso</h4>
+                        <p class="text-sm text-gray-500">$3.50 each</p>
+                    </div>
+                    <div class="font-bold text-gray-800">$3.50</div>
+                </div>
+            </div>
+
+            <!-- Tổng tiền & Nút thanh toán -->
+            <div class="p-6 bg-gray-50 border-t">
+                <div class="flex justify-between mb-2 text-gray-600">
+                    <span>Subtotal</span>
+                    <span class="font-bold">$8.00</span>
+                </div>
+                <div class="flex justify-between mb-4 text-gray-600">
+                    <span>Tax (8%)</span>
+                    <span class="font-bold">$0.64</span>
+                </div>
+                <div class="flex justify-between mb-6 text-xl">
+                    <span class="font-bold text-gray-800">Total</span>
+                    <span class="font-bold text-amber-600">$8.64</span>
+                </div>
+                
+                <!-- NÚT BẬT MODAL QR -->
+                <button id="btnShowQR" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl mb-3 shadow-lg flex items-center justify-center gap-2 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    QR Payment
+                    <!-- Chỗ này để hứng cái hình QR hiện ra -->
+                </button>
+                <button class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition">Void Order</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- MODAL THANH TOÁN QR (ẨN MẶC ĐỊNH)           -->
+    <!-- ========================================== -->
+    <div id="qrModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-[400px] rounded-2xl p-6 shadow-2xl relative animate-fade-in-up">
+            <!-- Nút tắt Modal -->
+            <button id="btnCloseQR" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Scan to Pay</h2>
+            
+            <!-- Khu vực chứa ảnh QR -->
+            <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 flex justify-center mb-6">
+                <!-- Chỗ này dùng JS để đổi src ảnh thật vào nhé -->
+                <div id="qrcodeBox" class="flex justify-center mt-4"></div>
+            </div>
+            
+            <div class="text-center mb-6">
+                <p class="text-4xl font-bold text-gray-800 mb-2">$8.64</p>
+                <p class="text-sm text-gray-500">Customer scans this QR code to complete payment</p>
+            </div>
+            
+            <button id="btnConfirmPay" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
+                Confirm Payment Received
+            </button>
+        </div>
+    </div>
+
+    <!-- Script điều khiển bật/tắt Modal -->
+    <script>
+        const qrModal = document.getElementById('qrModal');
+        const btnShowQR = document.getElementById('btnShowQR');
+        const btnCloseQR = document.getElementById('btnCloseQR');
+        const btnConfirmPay = document.getElementById('btnConfirmPay');
+
+        // Hiện modal
+        btnShowQR.addEventListener('click', () => {
+            qrModal.classList.remove('hidden');
+        });
+
+        // Ẩn modal
+        btnCloseQR.addEventListener('click', () => {
+            qrModal.classList.add('hidden');
+        });
+
+        // Nút xác nhận thanh toán xong
+        btnConfirmPay.addEventListener('click', () => {
+            alert('Thanh toán thành công! In bill thôi sếp!');
+            qrModal.classList.add('hidden');
+        });
+        // Xóa cái QR cũ (nếu có) trước khi vẽ cái mới để nó không bị dồn cục
+document.getElementById("qrcodeBox").innerHTML = "";
+
+// Vẽ QR mới tinh
+new QRCode(document.getElementById("qrcodeBox"), {
+    text: "https://vnpay.vn/thanh-toan-gi-gi-do", // Dữ liệu từ API Backend ném vào đây
+    width: 200,
+    height: 200,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+});
+    </script>
+     <script src="../src/js/logout.js"></script>
+    
+</body>
 </html>

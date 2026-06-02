@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.RateLimiting;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.BruteForceter;
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CoffeeShop.API.Controllers
 {
@@ -14,9 +18,11 @@ namespace CoffeeShop.API.Controllers
     public class AuthController : ControllerBase
     {
         public readonly AgainstBruteForce _bruteForceBLL;
-        public AuthController(AgainstBruteForce bruteForceBLL)
+        private readonly IConfiguration _configuration;
+        public AuthController(AgainstBruteForce bruteForceBLL, IConfiguration configuration)
         {
             _bruteForceBLL = bruteForceBLL;
+            _configuration = configuration;
         }
         [HttpPost("login")]
         [AllowAnonymous]
@@ -32,7 +38,8 @@ namespace CoffeeShop.API.Controllers
             // Trả về mã 400 Bad Request để JS biết đường mà chặn lại
             return BadRequest(new { message = result });
             }
-            // 1. Tạo hình hài cho cái két sắt Cookie
+            string realJwtToken = GenerateJwtToken(login.Email, "Staff");
+
     var cookieOptions = new CookieOptions
     {
         HttpOnly = true, 
@@ -41,12 +48,11 @@ namespace CoffeeShop.API.Controllers
         Expires = DateTime.UtcNow.AddDays(1) 
     };
 
-    // 2. Nhét Token vào Cookie và gắn vào thư trả về
-    Response.Cookies.Append("accessToken", result, cookieOptions);
+    // Nhét cái VÉ THẬT vào Cookie
+    Response.Cookies.Append("accessToken", realJwtToken, cookieOptions);
 
-    // 3. Trả JSON về cho Frontend, không cần gửi Token nữa
-    return Ok(new { message = "Đăng nhập thành công, token đã được cất vào két sắt!" });
-        }
+    return Ok(new { message = "Đăng nhập thành công, token THẬT đã được cất vào két sắt!" });
+}
         /*[Authorize(Policy = "AdminOnly")]
         [HttpPost("register-king")]
         public IActionResult Register([FormBody] RegisterNow register) {
@@ -76,5 +82,55 @@ namespace CoffeeShop.API.Controllers
         Response.Cookies.Delete("accessToken");
         return Ok(new { message = "Đăng xuất thành công, đã thu hồi lệnh bài!" });
         }
+        [HttpGet("me")]
+[Authorize] // Tấm khiên cực kỳ quan trọng! Cấm kẻ không có vé (Cookie) được đi qua.
+public IActionResult GetMe()
+{
+    // Nếu user chọc được vào đến dòng code này, chứng tỏ Token/Cookie của họ 
+    // vẫn còn hạn và đã vượt qua được cửa ải của ông bảo vệ [Authorize].
+    // Ta chỉ việc mỉm cười và trả về mã 200 OK cho Frontend.
+    
+    return Ok(new { message = "Vé còn hạn, mời sếp ở lại chơi!" });
+}
+private string GenerateJwtToken(string email, string role)
+    {
+        // Đọc cấu hình từ file appsettings.json
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings["SecretKey"];
+        var issuer = jwtSettings["Issuer"];
+        var audience = jwtSettings["Audience"];
+
+        // Dùng đúng chìa khóa đó để đúc vé
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, email),
+            new Claim(ClaimTypes.Role, role), 
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: issuer,       // Không hardcode nữa
+            audience: audience,   // Không hardcode nữa
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(1),
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    [HttpPost("verify-backdoor")]
+public IActionResult VerifyBackdoor([FromBody] string inputKey)
+{
+    var correctKey = _configuration["AdminSettings:BackdoorKey"];
+    
+    if (inputKey == correctKey)
+    {
+        return Ok(new { message = "Cửa ải đã mở!" });
+    }
+    
+    return Unauthorized(new { message = "Sai mã bí mật!" });
+}
     }
 }

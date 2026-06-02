@@ -3,6 +3,7 @@
 // ==========================================
 // Khối Form & Input
 const loginForm = document.getElementById('loginForm');
+const logoutForm = document.getElementById('logoutForm');
 const emailLogin = document.getElementById('email');
 const passwordLogin = document.getElementById('password');
 const selectedRoleInput = document.getElementById('selected-role'); // Ẩn lấy role
@@ -73,7 +74,29 @@ logo.addEventListener('touchend', cancelPress);
 function closeAdminModal() {
     adminModal.classList.add('hidden');
     adminModal.classList.remove('flex');
-    document.getElementById('admin-key').value = '';
+    // Sửa ID thành 'keyInput'
+    document.getElementById('keyInput').value = ''; 
+}
+async function loginAdmin() {
+    // Sửa ID thành 'keyInput'
+    const keyInput = document.getElementById('keyInput').value; 
+    
+    try {
+        const response = await fetch('http://localhost:5059/api/auth/verify-backdoor', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(keyInput)
+        });
+
+        if (response.ok) {
+            window.location.href = '/Admin/admin.html'; 
+        } else {
+            alert('Còi báo động: Mã truy cập sai!');
+            closeAdminModal(); 
+        }
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 // ==========================================

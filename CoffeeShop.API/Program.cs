@@ -61,7 +61,7 @@ builder.Services.AddAuthorization(options =>
     // "Role" là một Claims đặc biệt
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Admin","Manager"));
-    options.AddPolicy("Staff", policy => policy.RequireRole("Admin","Manager","Staff"));
+    options.AddPolicy("StaffOnly", policy => policy.RequireRole("Admin","Manager","Staff"));
 });
 builder.Services.AddRateLimiter(options => 
 {
