@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
-using CoffeeShop.BLL.BruteForceter;
+using CoffeeShop.BLL.DTOs.Inventory.Responses;
+//using CoffeeShop.BLL.TokenService;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using CoffeeShop.BLL;
 
 namespace CoffeeShop.API.Controllers
 {
@@ -17,18 +19,22 @@ namespace CoffeeShop.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        public readonly AgainstBruteForce _bruteForceBLL;
+        private readonly BruteForceService _bruteForceService;
         private readonly IConfiguration _configuration;
-        public AuthController(AgainstBruteForce bruteForceBLL, IConfiguration configuration)
+        private readonly RecoveryService _recoveryService;
+        private readonly OrderService _orderService;
+        public AuthController(BruteForceService bruteForceService, IConfiguration configuration, RecoveryService recoveryService, OrderService orderService)
         {
-            _bruteForceBLL = bruteForceBLL;
+            _bruteForceService = bruteForceService;
             _configuration = configuration;
+            _recoveryService = recoveryService;
+            _orderService = orderService;
         }
         [HttpPost("login")]
         [AllowAnonymous]
         [EnableRateLimiting("fixed")]
-        public async Task<IActionResult> Login([FromBody] LoginRequests login) {
-            string result = await _bruteForceBLL.Login(login);
+        /*public async Task<IActionResult> Login([FromBody] LoginRequests login) {
+            //string result = await _bruteForceBLL.Login(login);
             if (result == "Email không tồn tại !" || result == "Sai mật khẩu!" || result.Contains("khoá")) 
             {
                 return BadRequest(new { message = result });
@@ -38,7 +44,7 @@ namespace CoffeeShop.API.Controllers
             // Trả về mã 400 Bad Request để JS biết đường mà chặn lại
             return BadRequest(new { message = result });
             }
-            string realJwtToken = GenerateJwtToken(login.Email, "Staff");
+            //string realJwtToken = GenerateJwtToken(login.Email, "Staff");
 
     var cookieOptions = new CookieOptions
     {
@@ -92,34 +98,6 @@ public IActionResult GetMe()
     
     return Ok(new { message = "Vé còn hạn, mời sếp ở lại chơi!" });
 }
-private string GenerateJwtToken(string email, string role)
-    {
-        // Đọc cấu hình từ file appsettings.json
-        var jwtSettings = _configuration.GetSection("JwtSettings");
-        var secretKey = jwtSettings["SecretKey"];
-        var issuer = jwtSettings["Issuer"];
-        var audience = jwtSettings["Audience"];
-
-        // Dùng đúng chìa khóa đó để đúc vé
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, email),
-            new Claim(ClaimTypes.Role, role), 
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: issuer,       // Không hardcode nữa
-            audience: audience,   // Không hardcode nữa
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(1),
-            signingCredentials: credentials);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
     [HttpPost("verify-backdoor")]
 public IActionResult VerifyBackdoor([FromBody] string inputKey)
 {
@@ -132,5 +110,65 @@ public IActionResult VerifyBackdoor([FromBody] string inputKey)
     
     return Unauthorized(new { message = "Sai mã bí mật!" });
 }
+[HttpPost("forgot-password")]
+        [AllowAnonymous] // Cho phép người chưa đăng nhập gọi vào
+        public async Task<IActionResult> SendOtp([FromBody] ForgotPasswordRequest request)
+        {
+            // Gọi Service xử lý bất đồng bộ, dùng await để đợi kết quả true/false thật
+            bool result = await _recoveryService.GenerateAndSendOtpAsync(request.Email);
+            
+            // Nếu Service lắc đầu (Email không tồn tại)
+            if (!result)
+            {
+                return BadRequest(new { message = "Email này không tồn tại trong hệ thống!" });
+            }
+
+            return Ok(new { message = "Mã OTP đã được gửi, vui lòng kiểm tra hòm thư của bạn!" });
+        }
+
+        // ==========================================
+        // NHỊP 2: XÁC THỰC OTP VÀ ĐỔI MẬT KHẨU
+        // ==========================================
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RecoveryPassword([FromBody] ResetPasswordRequest request) 
+        {
+            // Lưu ý: Chỗ này trước khi gọi Service, em nhớ dùng BCrypt để băm mật khẩu mới ra nhé!
+            string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+            // Gửi dữ liệu xuống Nhịp 2 của Service để kiểm tra chéo với DB
+            bool result = await _recoveryService.VerifyAndResetPasswordAsync(request.Email, request.OtpCode, newPasswordHash);
+            
+            // Nếu Service báo sai mã OTP hoặc mã đã hết hạn
+            if (!result)
+            {
+                return BadRequest(new { message = "Mã OTP sai hoặc đã hết hạn sử dụng!" });
+            }
+
+            return Ok(new { message = "Đổi mật khẩu thành công! Mời sếp đăng nhập lại." });
+        }
+        [HttpPost("order")]
+        public async Task<IActionResult> CustomerOrder([FromBody] CustomerRequest request) 
+        {
+            if (request == null || request.ProductId <= 0 || request.Quantity <= 0)
+            {
+                return BadRequest(new { message = "Mày đã order đâu hoặc order láo hả thằng loz" });
+            }
+            try 
+            {
+                // 2. Ném hộp xuống tầng BLL (OrderService) để nó xử lý DB và tính tiền.
+                // Hứng lại cái hóa đơn (CustomerResponse) từ BLL trả lên.
+                var responseDto = await _orderService.CreateNewOrderAsync(request);
+                // 3. Trả về mã 201 kèm cái hóa đơn cho Frontend in ra bill
+                return StatusCode(201, new {
+                    message = "Ok rồi nhé thằng loz, bill của mày đây",
+                    data = responseDto
+                });
+            } catch (Exception ex)
+            {
+                // Nếu tầng BLL check DB thấy món nước không tồn tại, nó ném lỗi lên đây
+        return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

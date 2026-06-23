@@ -5,13 +5,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 //Chống bruteforce
 using Microsoft.AspNetCore.RateLimiting;
-using CoffeeShop.BLL.BruteForceter;
+using CoffeeShop.BLL; 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. ĐĂNG KÝ CỔNG ---
 builder.Services.AddControllers();
-builder.Services.AddScoped<AgainstBruteForce>();
+builder.Services.AddScoped<BruteForceService>();
 // Lấy thông tin cấu hình JWT từ file appsetiings.json
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
@@ -89,6 +89,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<AccountRepository>();
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<RecoveryService>();
+builder.Services.AddScoped<OrderDAL>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<ProductDAL>();
+builder.Services.AddScoped<StaffService>();
+builder.Services.AddScoped<StaffDAL>();
+
+
 
 var app = builder.Build();
 
