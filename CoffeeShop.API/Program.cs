@@ -97,6 +97,10 @@ builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<ProductDAL>();
 builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<StaffDAL>();
+builder.Services.AddScoped<BruteForceService>();
+builder.Services.AddScoped<BruteForceDAL>();
+
+
 
 
 
