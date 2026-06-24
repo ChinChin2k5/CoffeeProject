@@ -3,6 +3,7 @@ using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
 using System;
 using CoffeeShop.BLL;
+using Microsoft.AspNetCore.Authorization;
 namespace CoffeeShop.API.StaffController 
 {
     [ApiController]
@@ -13,6 +14,13 @@ namespace CoffeeShop.API.StaffController
         public StaffController(StaffService staffService)
         {
             _staffService = staffService;
+        }
+        [Authorize(Policy = "StaffOnly")]
+        [HttpGet("staff-data")]
+        public IActionResult Staff()
+        {
+            var data = new { message = "Staff execution :v" };
+            return Ok(data);
         }
         [HttpPost("import-inventory")]
         public async Task<IActionResult> ImportInventory([FromBody] StaffRequest request)

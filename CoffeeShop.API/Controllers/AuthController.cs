@@ -30,7 +30,7 @@ namespace CoffeeShop.API.Controllers
             _recoveryService = recoveryService;
             _orderService = orderService;
         }
-        [HttpPost("login")]
+        /*[HttpPost("login")]
         [AllowAnonymous]
         [EnableRateLimiting("fixed")]
         /*public async Task<IActionResult> Login([FromBody] LoginRequests login) {
@@ -65,21 +65,6 @@ namespace CoffeeShop.API.Controllers
             var data = new { message = "...."};
             return Ok(data);
         }*/
-
-        [Authorize(Policy = "ManagerOnly")]
-        [HttpGet("manager-data")]
-        public IActionResult Manager()
-        {
-            var data = new { message = "Manager controller" };
-            return Ok(data);
-        }
-        [Authorize(Policy = "StaffOnly")]
-        [HttpGet("staff-data")]
-        public IActionResult Staff()
-        {
-            var data = new { message = "Staff execution :v" };
-            return Ok(data);
-        }
         [HttpPost("logout")]
         [AllowAnonymous] // Ai cũng có quyền bấm đăng xuất
         public IActionResult Logout()
