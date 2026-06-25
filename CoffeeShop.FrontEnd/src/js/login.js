@@ -31,11 +31,15 @@ function selectRole(role) {
     const inactiveClass = "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200".split(" ");
 
     if (role === 'staff') {
-        btnStaff.classList.add(...activeClass); btnStaff.classList.remove(...inactiveClass);
-        btnManager.classList.add(...inactiveClass); btnManager.classList.remove(...activeClass);
+        btnStaff.classList.add(...activeClass); 
+        btnStaff.classList.remove(...inactiveClass);
+        btnManager.classList.add(...inactiveClass); 
+        btnManager.classList.remove(...activeClass);
     } else {
-        btnManager.classList.add(...activeClass); btnManager.classList.remove(...inactiveClass);
-        btnStaff.classList.add(...inactiveClass); btnStaff.classList.remove(...activeClass);
+        btnManager.classList.add(...activeClass); 
+        btnManager.classList.remove(...inactiveClass);
+        btnStaff.classList.add(...inactiveClass); 
+        btnStaff.classList.remove(...activeClass);
     }
 }
 
@@ -191,17 +195,22 @@ loginForm.addEventListener('submit', async function(event) {
             btnLogin.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     }
-    async function handleLogout() {
-        try {
-            await fetch('http://localhost:5059/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-            window.location.replace('/');
-        } catch (error) {
-            console.error("Lỗi khi đăng xuất:", error);
-            // Có lỗi thì vẫn cứ đá nó ra ngoài cho an toàn
-            window.location.replace('/');
-        }
-    }
 });
+async function handleLogout() {
+    try {
+        await fetch('http://localhost:5059/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        window.location.replace('/');
+    } catch (error) {
+        console.error("Lỗi khi đăng xuất:", error);
+        // Có lỗi thì vẫn cứ đá nó ra ngoài cho an toàn
+        window.location.replace('/');
+    }
+}
+logoutForm.addEventListener("submit", async function(event)) 
+{
+    event.preventDefault();
+}
+

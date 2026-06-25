@@ -9,6 +9,8 @@ namespace CoffeeShop.Models.Entities.Auth
         public int FalledLoginAttempts { get; set;}
         public DateTime? LockoutEnd { get; set; }
         public int? StoreId { get; set; }
+        public int OtpCode { get; set; }
+        public DateTime? OtpExpiryTime { get; set; }
         public virtual Store Store { get; set; }
         public virtual UserProfile UserProfile { get; set; }
     }

@@ -3,4 +3,5 @@
   <Project Path="CoffeeShop.BLL/CoffeeShop.BLL.csproj" />
   <Project Path="CoffeeShop.DAL/CoffeeShop.DAL.csproj" />
   <Project Path="CoffeeShop.Models/CoffeeShop.Models.csproj" />
+  <Project Path="CoffeeShop.Tests/CoffeeShop.Tests.csproj" />
 </Solution>

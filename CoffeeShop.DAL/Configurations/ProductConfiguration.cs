@@ -14,6 +14,10 @@ namespace CoffeeShop.DAL.Configurations
             builder.Property(e => e.Price).IsRequired().HasColumnType("decimal(18,2)");
             builder.Property(e => e.Image).IsRequired().HasMaxLength(500);
             builder.Property(e => e.CategoryId);
+            builder.HasMany(pr => pr.ProductRecipes)
+                   .WithOne(p => p.Products)
+                   .HasForeignKey(o => o.ProductId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

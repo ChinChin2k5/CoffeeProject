@@ -3,19 +3,38 @@ using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
 using CoffeeShop.DAL;
 using CoffeeShop.Models.Entities.Auth;
-using System;
-namespace CoffeeShop.BLL.BruteForceter
+using System.Threading.Tasks;
+namespace CoffeeShop.BLL
 {
-    public class AgainstBruteForce 
+    public class BruteForceService
     {
-        // Khai báo DbContext để tương tác với CSDL
-        private readonly AppDbContext _context;
-        // Nạp DbContext vào class
-        public AgainstBruteForce(AppDbContext context)
+        private readonly BruteForceDAL _bruteForceDAL;
+        public BruteForceService(BruteForceDAL bruteForceDAL)
         {
-            _context = context;
+            _bruteForceDAL = bruteForceDAL;
         }
-        public async Task<string> Login(LoginRequests request) 
+        //Hàm check xem có tài khoản nào đang bị khoá không ?
+        public bool IsAccountLocked(User user) 
+        {
+            return user.FalledLoginAttempts >= 5;
+        }
+        //Hàm ghi nhận 1 lần sai là 1 lần cộng dồn xuống database
+        public async Task CountBruteForce(User user) 
+        {
+            user.FalledLoginAttempts += 1;
+            await _bruteForceDAL.UpdateUserAttemptsAsync(user);
+        }
+        public async Task ResetFalledAttemptAsync(User user)
+        {
+            if (user.FalledLoginAttempts > 0) 
+            {
+                user.FalledLoginAttempts = 0;
+                await _bruteForceDAL.UpdateUserAttemptsAsync(user);
+            }
+        }
+    }
+}
+/*public async Task<string> Login(LoginRequests request) 
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null) 
@@ -25,11 +44,11 @@ namespace CoffeeShop.BLL.BruteForceter
             if (request.Password != user.PasswordHash)
             {
                 user.FalledLoginAttempts += 1;
+                await _context.SaveChangesAsync();
                 if (user.FalledLoginAttempts >= 5) 
                 {
                     return "Sai 5 lần, tài khoản đã bị khoá !";
                 }
-                await _context.SaveChangesAsync();
                 return "Sai mật khẩu!";
             }
             if (user.Role.ToLower() != request.Role.ToLower())
@@ -43,6 +62,4 @@ namespace CoffeeShop.BLL.BruteForceter
         public async Task<string> Response(LoginResponses response)
         {
             return null; //Tam thoi chua xu ly
-        }
-    }
-}
+        }*/

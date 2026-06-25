@@ -16,6 +16,8 @@ namespace CoffeeShop.DAL.Configurations
             builder.Property(e => e.Role).IsRequired().HasMaxLength(10).HasDefaultValue("Staff");
             builder.Property(e => e.FalledLoginAttempts).HasDefaultValue(0);
             builder.Property(e => e.LockoutEnd).IsRequired(false); 
+            builder.Property(e => e.OtpCode).IsRequired();
+            builder.Property(e => e.OtpExpiryTime).IsRequired().HasColumnType("timestamp with time zone");
             builder.HasOne(u => u.Store)
                 .WithMany(s => s.Users)
                 .HasForeignKey(u => u.StoreId)

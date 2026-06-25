@@ -9,7 +9,9 @@ namespace CoffeeShop.Models.Entities.Sales
         public int Status { get; set; }
         public int StaffId { get; set; }
         public int StoreId { get; set; }
+        public int CustomerId { get; set; }
         public virtual Store Store { get; set; }
+        public virtual Customer Customer { get; set; }
         //Lý do để dấu bằng là để tránh lỗi NULL
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }

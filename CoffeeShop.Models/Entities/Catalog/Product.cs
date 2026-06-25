@@ -9,5 +9,6 @@ namespace CoffeeShop.Models.Entities.Catalog
         //Khoa Ngoai
         public int CategoryId { get; set; }
         public virtual Category Category { get; set; }
+        public virtual ICollection<ProductRecipe> ProductRecipes { get; set; }
     }
 }

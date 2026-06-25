@@ -9,7 +9,7 @@ namespace CoffeeShop.DAL.Configurations
         public void Configure(EntityTypeBuilder<StoreInventory> builder)
         {
             builder.ToTable("StoreInventories");
-            builder.HasKey(e => e.StoreId);
+            builder.HasKey(si => new { si.StoreId, si.ItemId });
             builder.Property(e => e.ItemId).IsRequired();
             builder.Property(e => e.Quantity).IsRequired();
         }
