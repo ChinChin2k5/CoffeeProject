@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Bỏ qua file solution cũ vì dự án dùng định dạng .slnx
+*.sln
