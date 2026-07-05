@@ -33,4 +33,4 @@ jobs:
 
     # Bước 2.5: Chạy toàn bộ các bài Unit Test trong dự án
     - name: Run Test cases
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal --configuration Release
