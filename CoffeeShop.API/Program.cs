@@ -107,6 +107,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // "Hễ ai đòi IAuthService, hãy đưa cho nó class AuthService"
 builder.Services.AddScoped<IAuthService, AuthService>();
+// CoffeeShop.BLL.TokenService từ trái qua là namespace tức hộ khẩu của nó !
+builder.Services.AddScoped<CoffeeShop.BLL.TokenService.TokenService>();
 
 
 

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
-//using CoffeeShop.BLL.TokenService;
+using CoffeeShop.BLL.TokenService;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,9 +11,9 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using CoffeeShop.BLL.Interfaces;
 using CoffeeShop.DAL.Interfaces;
-using CoffeeShop.DAL.Data;         
-using CoffeeShop.DAL.Repositories; 
-using CoffeeShop.BLL.Services;     
+using CoffeeShop.DAL.Data;
+using CoffeeShop.DAL.Repositories;
+using CoffeeShop.BLL.Services;
 
 namespace CoffeeShop.API.Controllers
 {
@@ -28,43 +28,53 @@ namespace CoffeeShop.API.Controllers
         private readonly RecoveryService _recoveryService;
         private readonly OrderService _orderService;
         private readonly IAuthService _authService;
-        public AuthController(BruteForceService bruteForceService, IConfiguration configuration, RecoveryService recoveryService, OrderService orderService, IAuthService authService)
+        private readonly TokenService _tokenService;
+        public AuthController(BruteForceService bruteForceService, IConfiguration configuration, RecoveryService recoveryService, OrderService orderService, IAuthService authService, TokenService tokenService)
         {
             _bruteForceService = bruteForceService;
             _configuration = configuration;
             _recoveryService = recoveryService;
             _orderService = orderService;
             _authService = authService;
+            _tokenService = tokenService;
         }
         [HttpPost("login")]
         [AllowAnonymous]
         [EnableRateLimiting("fixed")]
-        public async Task<IActionResult> Login([FromBody] LoginRequests login) {
-            string result = await _bruteForceService.Login(login);
-            if (result == "Email không tồn tại !" || result == "Sai mật khẩu!" || result.Contains("khoá")) 
+        public IActionResult Login([FromBody] LoginRequests login)
+        {
+            try
             {
-                return BadRequest(new { message = result });
+                var result = _authService.Login(login);
+                if (result == null)
+                {
+                    return BadRequest(new { message = "Email này không tồn tại trong hệ thống!" });
+                }
+                //Nặn token thật
+                string realJwtToken = _tokenService.GenerateJwtToken(login.Email, result.Role);
+                result.Token = realJwtToken;
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false,  //Khi nào chạy production thì nhớ để true
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddDays(1)
+                };
+
+                // Nhét cái VÉ THẬT vào Cookie
+                Response.Cookies.Append("accessToken", realJwtToken, cookieOptions);
+
+                return Ok(new
+                {
+                    message = "Đăng nhập thành công, token THẬT đã được cất vào két sắt!",
+                    data = result
+                });
             }
-            if (result != "Đăng nhập thành công! Nhả Token ra đây!")
+            catch (Exception ex)
             {
-            // Trả về mã 400 Bad Request để JS biết đường mà chặn lại
-            return BadRequest(new { message = result });
+                return BadRequest(new { message = ex.Message });
             }
-            //string realJwtToken = GenerateJwtToken(login.Email, "Staff");
-
-    var cookieOptions = new CookieOptions
-    {
-        HttpOnly = true, 
-        Secure = false,  
-        SameSite = SameSiteMode.Lax, 
-        Expires = DateTime.UtcNow.AddDays(1) 
-    };
-
-    // Nhét cái VÉ THẬT vào Cookie
-    //Response.Cookies.Append("accessToken", realJwtToken, cookieOptions);
-
-    return Ok(new { message = "Đăng nhập thành công, token THẬT đã được cất vào két sắt!" });
-}
+        }
         /*[Authorize(Policy = "AdminOnly")]
         [HttpPost("register-king")]
         public IActionResult Register([FormBody] RegisterNow register) {
