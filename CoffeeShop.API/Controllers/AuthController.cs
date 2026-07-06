@@ -9,7 +9,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using CoffeeShop.BLL;
+using CoffeeShop.BLL.Interfaces;
+using CoffeeShop.DAL.Interfaces;
+using CoffeeShop.DAL.Data;         
+using CoffeeShop.DAL.Repositories; 
+using CoffeeShop.BLL.Services;     
 
 namespace CoffeeShop.API.Controllers
 {
@@ -23,18 +27,20 @@ namespace CoffeeShop.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly RecoveryService _recoveryService;
         private readonly OrderService _orderService;
-        public AuthController(BruteForceService bruteForceService, IConfiguration configuration, RecoveryService recoveryService, OrderService orderService)
+        private readonly IAuthService _authService;
+        public AuthController(BruteForceService bruteForceService, IConfiguration configuration, RecoveryService recoveryService, OrderService orderService, IAuthService authService)
         {
             _bruteForceService = bruteForceService;
             _configuration = configuration;
             _recoveryService = recoveryService;
             _orderService = orderService;
+            _authService = authService;
         }
-        /*[HttpPost("login")]
+        [HttpPost("login")]
         [AllowAnonymous]
         [EnableRateLimiting("fixed")]
-        /*public async Task<IActionResult> Login([FromBody] LoginRequests login) {
-            //string result = await _bruteForceBLL.Login(login);
+        public async Task<IActionResult> Login([FromBody] LoginRequests login) {
+            string result = await _bruteForceService.Login(login);
             if (result == "Email không tồn tại !" || result == "Sai mật khẩu!" || result.Contains("khoá")) 
             {
                 return BadRequest(new { message = result });
@@ -55,7 +61,7 @@ namespace CoffeeShop.API.Controllers
     };
 
     // Nhét cái VÉ THẬT vào Cookie
-    Response.Cookies.Append("accessToken", realJwtToken, cookieOptions);
+    //Response.Cookies.Append("accessToken", realJwtToken, cookieOptions);
 
     return Ok(new { message = "Đăng nhập thành công, token THẬT đã được cất vào két sắt!" });
 }
@@ -69,39 +75,39 @@ namespace CoffeeShop.API.Controllers
         [AllowAnonymous] // Ai cũng có quyền bấm đăng xuất
         public IActionResult Logout()
         {
-        // Lệnh cho trình duyệt thủ tiêu cái bánh quy mang tên "accessToken"
-        Response.Cookies.Delete("accessToken");
-        return Ok(new { message = "Đăng xuất thành công, đã thu hồi lệnh bài!" });
+            // Lệnh cho trình duyệt thủ tiêu cái bánh quy mang tên "accessToken"
+            Response.Cookies.Delete("accessToken");
+            return Ok(new { message = "Đăng xuất thành công, đã thu hồi lệnh bài!" });
         }
         [HttpGet("me")]
-[Authorize] // Tấm khiên cực kỳ quan trọng! Cấm kẻ không có vé (Cookie) được đi qua.
-public IActionResult GetMe()
-{
-    // Nếu user chọc được vào đến dòng code này, chứng tỏ Token/Cookie của họ 
-    // vẫn còn hạn và đã vượt qua được cửa ải của ông bảo vệ [Authorize].
-    // Ta chỉ việc mỉm cười và trả về mã 200 OK cho Frontend.
-    
-    return Ok(new { message = "Vé còn hạn, mời sếp ở lại chơi!" });
-}
-    [HttpPost("verify-backdoor")]
-public IActionResult VerifyBackdoor([FromBody] string inputKey)
-{
-    var correctKey = _configuration["AdminSettings:BackdoorKey"];
-    
-    if (inputKey == correctKey)
-    {
-        return Ok(new { message = "Cửa ải đã mở!" });
-    }
-    
-    return Unauthorized(new { message = "Sai mã bí mật!" });
-}
-[HttpPost("forgot-password")]
+        [Authorize] // Tấm khiên cực kỳ quan trọng! Cấm kẻ không có vé (Cookie) được đi qua.
+        public IActionResult GetMe()
+        {
+            // Nếu user chọc được vào đến dòng code này, chứng tỏ Token/Cookie của họ 
+            // vẫn còn hạn và đã vượt qua được cửa ải của ông bảo vệ [Authorize].
+            // Ta chỉ việc mỉm cười và trả về mã 200 OK cho Frontend.
+
+            return Ok(new { message = "Vé còn hạn, mời sếp ở lại chơi!" });
+        }
+        [HttpPost("verify-backdoor")]
+        public IActionResult VerifyBackdoor([FromBody] string inputKey)
+        {
+            var correctKey = _configuration["AdminSettings:BackdoorKey"];
+
+            if (inputKey == correctKey)
+            {
+                return Ok(new { message = "Cửa ải đã mở!" });
+            }
+
+            return Unauthorized(new { message = "Sai mã bí mật!" });
+        }
+        [HttpPost("forgot-password")]
         [AllowAnonymous] // Cho phép người chưa đăng nhập gọi vào
         public async Task<IActionResult> SendOtp([FromBody] ForgotPasswordRequest request)
         {
             // Gọi Service xử lý bất đồng bộ, dùng await để đợi kết quả true/false thật
             bool result = await _recoveryService.GenerateAndSendOtpAsync(request.Email);
-            
+
             // Nếu Service lắc đầu (Email không tồn tại)
             if (!result)
             {
@@ -116,14 +122,14 @@ public IActionResult VerifyBackdoor([FromBody] string inputKey)
         // ==========================================
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> RecoveryPassword([FromBody] ResetPasswordRequest request) 
+        public async Task<IActionResult> RecoveryPassword([FromBody] ResetPasswordRequest request)
         {
             // Lưu ý: Chỗ này trước khi gọi Service, em nhớ dùng BCrypt để băm mật khẩu mới ra nhé!
             string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
 
             // Gửi dữ liệu xuống Nhịp 2 của Service để kiểm tra chéo với DB
             bool result = await _recoveryService.VerifyAndResetPasswordAsync(request.Email, request.OtpCode, newPasswordHash);
-            
+
             // Nếu Service báo sai mã OTP hoặc mã đã hết hạn
             if (!result)
             {

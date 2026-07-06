@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using CoffeeShop.DAL; // Chỉnh lại cho đúng namespace chứa CafeDBContext của em
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 //Chống bruteforce
 using Microsoft.AspNetCore.RateLimiting;
-using CoffeeShop.BLL; 
+using CoffeeShop.DAL.Data;         
+using CoffeeShop.DAL.Repositories; 
+using CoffeeShop.DAL.Interfaces;   
+using CoffeeShop.BLL.Services;     
+using CoffeeShop.BLL.Interfaces;   
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +102,11 @@ builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<StaffDAL>();
 builder.Services.AddScoped<BruteForceService>();
 builder.Services.AddScoped<BruteForceDAL>();
+// "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// "Hễ ai đòi IAuthService, hãy đưa cho nó class AuthService"
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 
