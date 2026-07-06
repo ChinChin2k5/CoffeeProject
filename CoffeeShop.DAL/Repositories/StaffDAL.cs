@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using CoffeeShop.Models.Entities.Auth;
 using CoffeeShop.Models.Entities.Inventory;
 using CoffeeShop.Models.Entities.Catalog;
-namespace CoffeeShop.DAL 
+namespace CoffeeShop.DAL.Repositories
 {
     public class StaffDAL
     {

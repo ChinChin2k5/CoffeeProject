@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using CoffeeShop.Models.Entities.Auth;
 using System.Threading.Tasks;
 
-namespace CoffeeShop.DAL
+namespace CoffeeShop.DAL.Repositories
 {
     public class AccountRepository
     {

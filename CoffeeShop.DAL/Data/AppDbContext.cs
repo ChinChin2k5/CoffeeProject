@@ -5,9 +5,7 @@ using CoffeeShop.Models.Entities.Inventory;
 using CoffeeShop.Models.Entities.Sales;
 using CoffeeShop.Models.Entities.System;
 
-
-
-namespace CoffeeShop.DAL
+namespace CoffeeShop.DAL.Data
 {
     public class AppDbContext : DbContext 
     {
