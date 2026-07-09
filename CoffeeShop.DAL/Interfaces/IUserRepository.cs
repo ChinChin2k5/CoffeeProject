@@ -1,5 +1,5 @@
-using CoffeeShop.Models.Entities.User.Auth;
-namespace CoffeeShop.BLL.Interfaces
+using CoffeeShop.Models.Entities.Auth;
+namespace CoffeeShop.DAL.Interfaces
 {
     public interface IUserRepository
     {

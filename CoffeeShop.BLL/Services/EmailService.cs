@@ -1,6 +1,5 @@
 using MailKit.Net.Smtp;
 using MimeKit;
-using System.Threading.Tasks;
 using CoffeeShop.BLL.DTOs.Inventory;
 
 public class EmailService 

@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using CoffeeShop.Models.Entities.Auth;
 using CoffeeShop.Models.Entities.Inventory;
 using CoffeeShop.Models.Entities.Catalog;
+using CoffeeShop.DAL.Data;
+
 namespace CoffeeShop.DAL.Repositories
 {
     public class StaffDAL

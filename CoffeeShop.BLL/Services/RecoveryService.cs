@@ -1,11 +1,9 @@
-using CoffeeShop.DAL;
+using CoffeeShop.DAL.Repositories;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
-using System.Threading.Tasks;
-using System;
 using CoffeeShop.BLL;
 
 // Nên có cái namespace để bọc class lại cho chuẩn kiến trúc nhé
-namespace CoffeeShop.BLL
+namespace CoffeeShop.BLL.Services
 {
     public class RecoveryService 
     {

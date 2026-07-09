@@ -1,7 +1,7 @@
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
 using CoffeeShop.Models.Entities.Sales;
-using CoffeeShop.DAL;
+using CoffeeShop.DAL.Repositories;
 public class OrderService
 {
     private readonly ProductDAL _productDal;

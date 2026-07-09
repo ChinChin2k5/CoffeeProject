@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using CoffeeShop.Models.Entities.Auth;
-using System.Threading.Tasks;
+using CoffeeShop.DAL.Data;
 
 namespace CoffeeShop.DAL.Repositories
 {

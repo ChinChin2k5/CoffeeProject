@@ -1,7 +1,6 @@
-using CoffeeShop.DAL;
+using CoffeeShop.DAL.Repositories;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
-using System.Threading.Tasks;
 public class StaffService
 {
     private readonly StaffDAL _staffDal;
