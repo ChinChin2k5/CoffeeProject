@@ -9,7 +9,7 @@ namespace CoffeeShop.API.ManagerController
     [Route("api/[controller]")]
     public class ManagerController : ControllerBase
     {
-        [Authorize(Policy = "ManagerOnly")]
+        [Authorize(Roles = "Manager")]
         [HttpGet("manager-data")]
         public IActionResult Manager()
         {

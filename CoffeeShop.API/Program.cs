@@ -102,6 +102,7 @@ builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<StaffDAL>();
 builder.Services.AddScoped<BruteForceService>();
 builder.Services.AddScoped<BruteForceDAL>();
+builder.Services.AddScoped<PasswordHasher>();
 // "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 

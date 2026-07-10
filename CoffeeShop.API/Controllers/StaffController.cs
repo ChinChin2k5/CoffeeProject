@@ -14,7 +14,7 @@ namespace CoffeeShop.API.StaffController
         {
             _staffService = staffService;
         }
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Roles = "Staff")]
         [HttpGet("staff-data")]
         public IActionResult Staff()
         {

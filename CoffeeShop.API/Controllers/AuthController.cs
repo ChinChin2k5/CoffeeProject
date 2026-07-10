@@ -24,7 +24,14 @@ namespace CoffeeShop.API.Controllers
         private readonly OrderService _orderService;
         private readonly IAuthService _authService;
         private readonly TokenService _tokenService;
-        public AuthController(BruteForceService bruteForceService, IConfiguration configuration, RecoveryService recoveryService, OrderService orderService, IAuthService authService, TokenService tokenService)
+        private readonly PasswordHasher _passwordHasher;
+        public AuthController(BruteForceService bruteForceService, 
+        IConfiguration configuration, 
+        RecoveryService recoveryService, 
+        OrderService orderService, 
+        IAuthService authService, 
+        TokenService tokenService,
+        PasswordHasher passwordHasher)
         {
             _bruteForceService = bruteForceService;
             _configuration = configuration;
@@ -32,6 +39,7 @@ namespace CoffeeShop.API.Controllers
             _orderService = orderService;
             _authService = authService;
             _tokenService = tokenService;
+            _passwordHasher = passwordHasher;
         }
         [HttpPost("login")]
         [AllowAnonymous]
@@ -76,6 +84,7 @@ namespace CoffeeShop.API.Controllers
             var data = new { message = "...."};
             return Ok(data);
         }*/
+        // Hàm logout này tí nữa mình sẽ xử lý
         [HttpPost("logout")]
         [AllowAnonymous] // Ai cũng có quyền bấm đăng xuất
         public IActionResult Logout()
@@ -130,7 +139,7 @@ namespace CoffeeShop.API.Controllers
         public async Task<IActionResult> RecoveryPassword([FromBody] ResetPasswordRequest request)
         {
             // Lưu ý: Chỗ này trước khi gọi Service, em nhớ dùng BCrypt để băm mật khẩu mới ra nhé!
-            string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            string newPasswordHash = _passwordHasher.Hash(request.NewPassword);
 
             // Gửi dữ liệu xuống Nhịp 2 của Service để kiểm tra chéo với DB
             bool result = await _recoveryService.VerifyAndResetPasswordAsync(request.Email, request.OtpCode, newPasswordHash);
