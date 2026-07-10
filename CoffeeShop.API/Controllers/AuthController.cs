@@ -36,11 +36,11 @@ namespace CoffeeShop.API.Controllers
         [HttpPost("login")]
         [AllowAnonymous]
         [EnableRateLimiting("fixed")]
-        public IActionResult Login([FromBody] LoginRequests login)
+        public async Task<IActionResult> Login([FromBody] LoginRequests login)
         {
             try
             {
-                var result = _authService.Login(login);
+                var result = await _authService.Login(login);
                 if (result == null)
                 {
                     return BadRequest(new { message = "Email này không tồn tại trong hệ thống!" });
