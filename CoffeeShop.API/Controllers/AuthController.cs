@@ -75,7 +75,7 @@ namespace CoffeeShop.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = "Đã có lỗi hệ thống xảy ra, vui lòng thử lại sau!" });
             }
         }
         /*[Authorize(Policy = "AdminOnly")]
@@ -116,7 +116,8 @@ namespace CoffeeShop.API.Controllers
             return Unauthorized(new { message = "Sai mã bí mật!" });
         }
         [HttpPost("forgot-password")]
-        [AllowAnonymous] // Cho phép người chưa đăng nhập gọi vào
+        [AllowAnonymous]
+        [EnableRateLimiting("fixed")]
         public async Task<IActionResult> SendOtp([FromBody] ForgotPasswordRequest request)
         {
             // Gọi Service xử lý bất đồng bộ, dùng await để đợi kết quả true/false thật
@@ -136,6 +137,8 @@ namespace CoffeeShop.API.Controllers
         // ==========================================
         [HttpPost("reset-password")]
         [AllowAnonymous]
+        [EnableRateLimiting("fixed")]
+
         public async Task<IActionResult> RecoveryPassword([FromBody] ResetPasswordRequest request)
         {
             // Lưu ý: Chỗ này trước khi gọi Service, em nhớ dùng BCrypt để băm mật khẩu mới ra nhé!
