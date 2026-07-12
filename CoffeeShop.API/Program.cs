@@ -137,5 +137,23 @@ app.UseAuthorization();
 
 app.MapControllers(); 
 
+//Kích hoạt Seeding Động
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        var config = services.GetRequiredService<IConfiguration>();
+        
+        // Bấm nút khởi động máy bơm!
+        DbSeeder.SeedData(context, config);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Có biến lúc bơm dữ liệu Seeding rồi sếp ơi!");
+    }
+}
 // --- 3. KHỞI CHẠY ---
 app.Run();
