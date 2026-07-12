@@ -109,9 +109,27 @@ namespace CoffeeShop.API.Controllers
             var correctKey = _configuration["AdminSettings:BackdoorKey"];
 
             if (inputKey == correctKey)
-            {
-                return Ok(new { message = "Cửa ải đã mở!" });
-            }
+    {
+        // 1. Nặn Token thật cho Admin (Ép cứng email của ông Admin thủy tổ vào đây)
+        string realJwtToken = _tokenService.GenerateJwtToken("admin@coffeeshop.com", "Admin");
+
+        // 2. Nhét VÉ vào két sắt Cookie
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false, // Khi lên Prod nhớ đổi thành true
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTime.UtcNow.AddDays(1)
+        };
+        Response.Cookies.Append("accessToken", realJwtToken, cookieOptions);
+
+        // 3. Phải trả thêm cái Role về cho Frontend để nó cất vào Balo
+        return Ok(new 
+        { 
+            message = "Cửa ải đã mở!",
+            data = new { role = "Admin" } // <-- Quan trọng!
+        });
+    }
 
             return Unauthorized(new { message = "Sai mã bí mật!" });
         }
