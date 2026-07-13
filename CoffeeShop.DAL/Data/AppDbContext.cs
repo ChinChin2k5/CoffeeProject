@@ -25,7 +25,7 @@ namespace CoffeeShop.DAL.Data
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<SystemAuditLog> SystemAuditLogs { get; set; }
         public DbSet<Customer> Customers { get; set; }
-
+        //Kỹ thuật Data Seeding (không cần phải Insert dữ liệu mỗi khi xoá database)
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Bước "lấy khung" của Bố 

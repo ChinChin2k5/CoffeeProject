@@ -98,40 +98,39 @@ namespace CoffeeShop.API.Controllers
         public IActionResult GetMe()
         {
             // Nếu user chọc được vào đến dòng code này, chứng tỏ Token/Cookie của họ 
-            // vẫn còn hạn và đã vượt qua được cửa ải của ông bảo vệ [Authorize].
-            // Ta chỉ việc mỉm cười và trả về mã 200 OK cho Frontend.
 
             return Ok(new { message = "Vé còn hạn, mời sếp ở lại chơi!" });
         }
         [HttpPost("verify-backdoor")]
         public IActionResult VerifyBackdoor([FromBody] string inputKey)
         {
-            var correctKey = _configuration["AdminSettings:BackdoorKey"];
+            // 1. Lễ tân bốc máy gọi Não Bộ xử lý logic
+    var result = _authService.VerifyBackdoor(inputKey);
 
-            if (inputKey == correctKey)
+    // 2. Não bộ bảo sai -> Đuổi khách
+    if (result == null)
     {
-        // 1. Nặn Token thật cho Admin (Ép cứng email của ông Admin thủy tổ vào đây)
-        string realJwtToken = _tokenService.GenerateJwtToken("admin@coffeeshop.com", "Admin");
-
-        // 2. Nhét VÉ vào két sắt Cookie
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = false, // Khi lên Prod nhớ đổi thành true
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTime.UtcNow.AddDays(1)
-        };
-        Response.Cookies.Append("accessToken", realJwtToken, cookieOptions);
-
-        // 3. Phải trả thêm cái Role về cho Frontend để nó cất vào Balo
-        return Ok(new 
-        { 
-            message = "Cửa ải đã mở!",
-            data = new { role = "Admin" } // <-- Quan trọng!
-        });
+        return Unauthorized(new { message = "Sai mã bí mật!" });
     }
 
-            return Unauthorized(new { message = "Sai mã bí mật!" });
+    // 3. Não bộ bảo đúng -> Lễ tân lấy Token cất vào Cookie
+    var cookieOptions = new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = false, 
+        SameSite = SameSiteMode.Lax,
+        Expires = DateTime.UtcNow.AddDays(1)
+    };
+    
+    // Nhét token từ result vào bánh quy
+    Response.Cookies.Append("accessToken", result.Token, cookieOptions);
+
+    // 4. Mỉm cười trả kết quả cho Frontend
+    return Ok(new 
+    { 
+        message = "Cửa ải quản trị đã mở!",
+        data = result 
+    });
         }
         [HttpPost("forgot-password")]
         [AllowAnonymous]

@@ -1,6 +1,7 @@
 using CoffeeShop.DAL.Interfaces; 
 using CoffeeShop.DAL.Data;
 using CoffeeShop.Models.Entities.Auth;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoffeeShop.DAL.Repositories
 {
@@ -11,10 +12,14 @@ namespace CoffeeShop.DAL.Repositories
         {
             _dbContext = dbContext;
         }
-        public User GetUserByEmail(string email)
+        public async Task<User> GetUserByEmail(string email)
         {
             // Dùng LINQ chọc xuống DB lấy User lên cực kỳ nhàn hạ
-            return _dbContext.Users.FirstOrDefault(u => u.Email == email);
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+        public async Task<User> GetAdminAccount()
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Role == "Admin");
         }
     }
 }

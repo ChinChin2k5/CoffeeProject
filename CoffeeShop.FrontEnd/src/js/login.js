@@ -54,14 +54,58 @@ function togglePassword(inputId) {
 // ==========================================
 let pressTimer;
 
-function startPress(e) {
-    e.preventDefault(); 
-    logo.classList.replace('scale-100', 'scale-95'); 
-    pressTimer = setTimeout(() => {
+// ==========================================
+// 3. BACKDOOR ADMIN (GÕ CỬA 5 LẦN TRONG 2 GIÂY)
+// ==========================================
+let clickCount = 0;
+let clickTimer;
+
+// Chiêu 1: Gõ cửa logo
+logo.addEventListener('click', (e) => {
+    e.preventDefault();
+    clickCount++; // Mỗi lần click là đếm +1
+
+    // Nếu là cú click đầu tiên, bắt đầu bấm giờ 2 giây
+    if (clickCount === 1) {
+        clickTimer = setTimeout(() => {
+            // Hết 2 giây mà chưa gõ đủ 5 phát -> Reset về 0. Bắt gõ lại từ đầu!
+            clickCount = 0; 
+        }, 2000); 
+    }
+
+    // Đạt đủ 5 combo liên tiếp -> Mở cửa không gian!
+    if (clickCount === 5) {
+        clearTimeout(clickTimer); // Hủy bấm giờ
+        clickCount = 0; // Reset để lần sau còn dùng được
+        
+        // Hiệu ứng giật logo nhẹ 1 cái cho ngầu
+        logo.classList.add('scale-90');
+        setTimeout(() => logo.classList.remove('scale-90'), 150);
+
+        // Mở Modal
         adminModal.classList.remove('hidden');
         adminModal.classList.add('flex');
-    }, 3000);
+    }
+});
+
+// Chiêu 2: Bùa gỡ rối cho Dev (Chỉ dùng được trên Máy tính)
+// Bí kíp: Nhấn tổ hợp phím "Ctrl + Shift + A" ở bất kỳ đâu trên màn hình Lễ Tân
+document.addEventListener('keydown', (e) => {
+    // Nếu bấm đúng Ctrl + Shift + A thì mở Modal
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        adminModal.classList.remove('hidden');
+        adminModal.classList.add('flex');
+    }
+});
+
+function closeAdminModal() {
+    adminModal.classList.add('hidden');
+    adminModal.classList.remove('flex');
+    document.getElementById('keyInput').value = ''; 
 }
+
+// ... (Giữ nguyên hàm loginAdmin của sếp ở dưới) ...
 
 
 function cancelPress() {
@@ -89,11 +133,19 @@ async function loginAdmin() {
         const response = await fetch('http://localhost:5059/api/auth/verify-backdoor', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            //Dòng này cho phép hai cổng giao tiếp được với nhau thông qua Cookie 
+            credentials: 'include',
             body: JSON.stringify(keyInput)
         });
+        //Chỗ này mình thiếu, biến cái response thành dữ liệu đọc được
+        const data = await response.json();
 
         if (response.ok) {
-            window.location.href = '/Admin/admin.html'; 
+            // 2. Cất vé VIP vào Balo
+            console.log("Cấu trúc toàn bộ data gốc:", data);
+            localStorage.setItem('userRole', data.data.role); 
+            // 3. Mới được chuyển trang
+            window.location.href = '/Admin/admin.html';
         } else {
             alert('Còi báo động: Mã truy cập sai!');
             closeAdminModal(); 
@@ -175,17 +227,25 @@ loginForm.addEventListener('submit', async function(event) {
             }
 
             // Đăng nhập thành công!
-            console.log("Login thành công:", data);
-            
+            console.log("Login thành công, cục data từ backend trả về là: ", data);
+
+            const realRole = data.data.role;
+
+            if (roleValue !== realRole.toLowerCase())
+            {
+                alert("Tài khoản không thuộc phân sự này");
+                return;
+            }
+            //Cất đồ vào trong Local Storage
+            localStorage.setItem('userRole', realRole);
             // 2. Chuyển hướng người dùng dựa theo role
-            if (roleValue === 'admin') {
+            if (realRole === 'Admin') {
                 window.location.href = '/Admin/admin.html';
-            } else if (roleValue === 'manager') {
+            } else if (realRole === 'Manager') {
                 window.location.href = '/Manager/manager.html';
             } else {
                 window.location.href = '/Staff/staff.html';
             }
-
         } catch (error) {
             console.error("Lỗi đăng nhập:", error);
             // Hiển thị lỗi từ server cho người dùng thấy (em có thể tạo 1 thẻ <p> để hiện lỗi này)
@@ -209,8 +269,11 @@ async function handleLogout() {
         window.location.replace('/');
     }
 }
-logoutForm.addEventListener("submit", async function(event)) 
-{
-    event.preventDefault();
+// Chỉ gắn sự kiện lắng nghe ĐĂNG XUẤT nếu trang hiện tại thực sự CÓ form đăng xuất
+if (logoutForm) {
+    logoutForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+        await handleLogout(); // Nhớ gọi hàm xử lý logout ở đây luôn nhé sếp!
+    });
 }
 

@@ -11,10 +11,14 @@ async function checkAuthStatus() {
             // VÉ CHUẨN: Kéo rèm lên cho sếp vào làm việc!
             document.body.style.opacity = '1';
         } else {
+            //Server bảo vé hết hạn -> xé thẻ ngay lập tức!
+            localStorage.removeItem("userRole");
             // SAI VÉ: Để nguyên màn hình trắng và sút ra ngoài
             window.location.replace('/'); 
         }
     } catch (error) {
+        // Lỗi kết nối hoặc server sập -> Cũng xé thẻ, đá ra ngoài cho an toàn
+        localStorage.removeItem("userRole");
         window.location.replace('/');
     }
 }
@@ -40,13 +44,16 @@ async function handleLogout() {
 
         // Backend trả về thành công thì đá về trang chủ
         if (response.ok) {
+            localStorage.removeItem("userRole");
             window.location.replace('/');
         } else {
             console.error("Lỗi từ server khi đăng xuất");
+            localStorage.removeItem("userRole");
             window.location.replace('/'); // Lỗi thì cũng đá ra ngoài luôn cho an toàn
         }
     } catch (error) {
         console.error("Lỗi khi đăng xuất:", error);
+        localStorage.removeItem("userRole");
         window.location.replace('/');
     }
 }
