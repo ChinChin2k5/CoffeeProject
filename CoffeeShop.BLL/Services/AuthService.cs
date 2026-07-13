@@ -44,7 +44,7 @@ namespace CoffeeShop.BLL.Services
             if (!isMatch)
             {
                 await _bruteForceService.CountBruteForce(userInDb.Email);
-                throw new Exception("Sai mật khẩu!");
+                throw new UnauthorizedAccessException("Sai mật khẩu!");
             }
             await _bruteForceService.ResetFalledAttemptAsync(userInDb.Email);
             string realToken = _tokenService.GenerateJwtToken(userInDb.Email, userInDb.Role);

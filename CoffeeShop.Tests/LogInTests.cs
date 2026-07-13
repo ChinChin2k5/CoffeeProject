@@ -78,4 +78,17 @@ public class LogInTests
         result.Should().NotBeNull();
         result.Role.Should().Be("Admin");
     }
+    [Fact]
+    public async Task Login_WrongPassword_ThrowsUnauthorized()
+    {
+        //1: Arrange
+        //Giả sử User trong DB là "aidodeptraisieucapvutru"
+        var request = new LoginRequests { Email = "test@cafe.com", Password = "wrong_password"};
+        var mockRepo = new Mock<IUserRepository>();
+        mockRepo.Setup(r => r.GetUserByEmail(request.Email))
+                .ReturnsAsync(new User {Email = "test@cafe.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("aidodeptraisieucapvutru")});
+        var authService = new AuthService(mockRepo.Object, new Mock<ITokenService>().Object, new Mock<IBruteForceService>().Object, new Mock<IConfiguration>().Object);
+        await authService.Invoking(s => s.Login(request))
+                         .Should().ThrowAsync<UnauthorizedAccessException>();
+    }
 }
