@@ -20,22 +20,22 @@ namespace CoffeeShop.API.Controllers
     {
         private readonly BruteForceService _bruteForceService;
         private readonly IConfiguration _configuration;
-        private readonly RecoveryService _recoveryService;
+        //private readonly RecoveryService _recoveryService;
         private readonly OrderService _orderService;
         private readonly IAuthService _authService;
-        private readonly TokenService _tokenService;
+        private readonly ITokenService _tokenService;
         private readonly PasswordHasher _passwordHasher;
-        public AuthController(BruteForceService bruteForceService, 
-        IConfiguration configuration, 
-        RecoveryService recoveryService, 
-        OrderService orderService, 
-        IAuthService authService, 
-        TokenService tokenService,
+        public AuthController(BruteForceService bruteForceService,
+        IConfiguration configuration,
+        //RecoveryService recoveryService, 
+        OrderService orderService,
+        IAuthService authService,
+        ITokenService tokenService,
         PasswordHasher passwordHasher)
         {
             _bruteForceService = bruteForceService;
             _configuration = configuration;
-            _recoveryService = recoveryService;
+            //_recoveryService = recoveryService;
             _orderService = orderService;
             _authService = authService;
             _tokenService = tokenService;
@@ -53,9 +53,6 @@ namespace CoffeeShop.API.Controllers
                 {
                     return BadRequest(new { message = "Email này không tồn tại trong hệ thống!" });
                 }
-                //Nặn token thật
-                string realJwtToken = _tokenService.GenerateJwtToken(login.Email, result.Role);
-                result.Token = realJwtToken;
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
@@ -65,7 +62,7 @@ namespace CoffeeShop.API.Controllers
                 };
 
                 // Nhét cái VÉ THẬT vào Cookie
-                Response.Cookies.Append("accessToken", realJwtToken, cookieOptions);
+                Response.Cookies.Append("accessToken", result.Token, cookieOptions);
 
                 return Ok(new
                 {
@@ -105,32 +102,32 @@ namespace CoffeeShop.API.Controllers
         public IActionResult VerifyBackdoor([FromBody] string inputKey)
         {
             // 1. Lễ tân bốc máy gọi Não Bộ xử lý logic
-    var result = _authService.VerifyBackdoor(inputKey);
+            var result = _authService.VerifyBackdoor(inputKey);
 
-    // 2. Não bộ bảo sai -> Đuổi khách
-    if (result == null)
-    {
-        return Unauthorized(new { message = "Sai mã bí mật!" });
-    }
+            // 2. Não bộ bảo sai -> Đuổi khách
+            if (result == null)
+            {
+                return Unauthorized(new { message = "Sai mã bí mật!" });
+            }
 
-    // 3. Não bộ bảo đúng -> Lễ tân lấy Token cất vào Cookie
-    var cookieOptions = new CookieOptions
-    {
-        HttpOnly = true,
-        Secure = false, 
-        SameSite = SameSiteMode.Lax,
-        Expires = DateTime.UtcNow.AddDays(1)
-    };
-    
-    // Nhét token từ result vào bánh quy
-    Response.Cookies.Append("accessToken", result.Token, cookieOptions);
+            // 3. Não bộ bảo đúng -> Lễ tân lấy Token cất vào Cookie
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(1)
+            };
 
-    // 4. Mỉm cười trả kết quả cho Frontend
-    return Ok(new 
-    { 
-        message = "Cửa ải quản trị đã mở!",
-        data = result 
-    });
+            // Nhét token từ result vào bánh quy
+            Response.Cookies.Append("accessToken", result.Token, cookieOptions);
+
+            // 4. Mỉm cười trả kết quả cho Frontend
+            return Ok(new
+            {
+                message = "Cửa ải quản trị đã mở!",
+                data = result
+            });
         }
         [HttpPost("forgot-password")]
         [AllowAnonymous]
@@ -138,13 +135,13 @@ namespace CoffeeShop.API.Controllers
         public async Task<IActionResult> SendOtp([FromBody] ForgotPasswordRequest request)
         {
             // Gọi Service xử lý bất đồng bộ, dùng await để đợi kết quả true/false thật
-            bool result = await _recoveryService.GenerateAndSendOtpAsync(request.Email);
+            //bool result = await _recoveryService.GenerateAndSendOtpAsync(request.Email);
 
             // Nếu Service lắc đầu (Email không tồn tại)
-            if (!result)
+            /*if (!result)
             {
                 return BadRequest(new { message = "Email này không tồn tại trong hệ thống!" });
-            }
+            }*/
 
             return Ok(new { message = "Mã OTP đã được gửi, vui lòng kiểm tra hòm thư của bạn!" });
         }
@@ -162,13 +159,13 @@ namespace CoffeeShop.API.Controllers
             string newPasswordHash = _passwordHasher.Hash(request.NewPassword);
 
             // Gửi dữ liệu xuống Nhịp 2 của Service để kiểm tra chéo với DB
-            bool result = await _recoveryService.VerifyAndResetPasswordAsync(request.Email, request.OtpCode, newPasswordHash);
+            //bool result = await _recoveryService.VerifyAndResetPasswordAsync(request.Email, request.OtpCode, newPasswordHash);
 
             // Nếu Service báo sai mã OTP hoặc mã đã hết hạn
-            if (!result)
+            /*if (!result)
             {
                 return BadRequest(new { message = "Mã OTP sai hoặc đã hết hạn sử dụng!" });
-            }
+            }*/
 
             return Ok(new { message = "Đổi mật khẩu thành công! Mời sếp đăng nhập lại." });
         }

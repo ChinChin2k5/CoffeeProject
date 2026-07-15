@@ -94,17 +94,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<AccountRepository>();
 builder.Services.AddScoped<EmailService>();
-builder.Services.AddScoped<RecoveryService>();
+//builder.Services.AddScoped<RecoveryService>();
 builder.Services.AddScoped<OrderDAL>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<ProductDAL>();
 builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<StaffDAL>();
-builder.Services.AddScoped<BruteForceService>();
 builder.Services.AddScoped<BruteForceDAL>();
 builder.Services.AddScoped<PasswordHasher>();
 // "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IBruteForceService, BruteForceService>();
+
 
 // "Hễ ai đòi IAuthService, hãy đưa cho nó class AuthService"
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -153,6 +155,22 @@ using (var scope = app.Services.CreateScope())
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Có biến lúc bơm dữ liệu Seeding rồi sếp ơi!");
+    }
+}
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Nhớ đổi chữ AppDbContext thành tên DB Context thực tế của sếp nhé
+        var context = services.GetRequiredService<AppDbContext>(); 
+        
+        // GỌI HÀM SEED Ở ĐÂY NÀY!
+        DbInitializer.Seed(context); 
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Oái! Lỗi lúc Seeding sếp ơi: " + ex.Message);
     }
 }
 // --- 3. KHỞI CHẠY ---
