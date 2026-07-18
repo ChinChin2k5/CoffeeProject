@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace CoffeeShop.Tests;
 
-public class LogInTests 
+public class LogInTests
 {
     [Theory]
     [InlineData("manager@mycafe.com", "ManagerPass!2", "Manager")]
@@ -29,8 +29,8 @@ public class LogInTests
                 .ReturnsAsync(new User
                 {
                     Email = testEmail,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), 
-                    Role = expectedRole 
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword),
+                    Role = expectedRole
                 });
 
         mockTokenService.Setup(t => t.GenerateJwtToken(It.IsAny<string>(), It.IsAny<string>()))
@@ -41,7 +41,7 @@ public class LogInTests
         var result = await authService.Login(request);
 
         result.Should().NotBeNull();
-        result.Role.Should().Be(expectedRole); 
+        result.Role.Should().Be(expectedRole);
         result.Token.Should().NotBeNullOrEmpty();
     }
 
@@ -50,7 +50,7 @@ public class LogInTests
     {
         // 1. ARRANGE
         string secretKey = "Ma_Bi_Mat_Cua_Tui";
-        
+
         var mockRepo = new Mock<IUserRepository>();
         var mockTokenService = new Mock<ITokenService>();
         var mockBruteForceService = new Mock<IBruteForceService>();
@@ -58,11 +58,11 @@ public class LogInTests
 
         mockConfig.Setup(c => c["AdminSettings:BackdoorKey"]).Returns(secretKey);
         mockRepo.Setup(repo => repo.GetAdminAccount())
-                .ReturnsAsync(new User 
-                { 
-                    Email = "admin@coffeeshop.com", 
+                .ReturnsAsync(new User
+                {
+                    Email = "admin@coffeeshop.com",
                     Role = "Admin",
-                    PasswordHash = "BACKDOOR_ONLY_NO_REAL_PASSWORD_ALLOWED_HERE" 
+                    PasswordHash = "BACKDOOR_ONLY_NO_REAL_PASSWORD_ALLOWED_HERE"
                 });
 
         // Setup cho Token Service lỡ hàm Backdoor có gọi tới
@@ -72,7 +72,7 @@ public class LogInTests
         var authService = new AuthService(mockRepo.Object, mockTokenService.Object, mockBruteForceService.Object, mockConfig.Object);
 
         // 2. ACT
-        var result = authService.VerifyBackdoor(secretKey); 
+        var result = authService.VerifyBackdoor(secretKey);
 
         // 3. ASSERT
         result.Should().NotBeNull();
@@ -83,12 +83,48 @@ public class LogInTests
     {
         //1: Arrange
         //Giả sử User trong DB là "aidodeptraisieucapvutru"
-        var request = new LoginRequests { Email = "test@cafe.com", Password = "wrong_password"};
+        var request = new LoginRequests { Email = "test@cafe.com", Password = "wrong_password" };
         var mockRepo = new Mock<IUserRepository>();
         mockRepo.Setup(r => r.GetUserByEmail(request.Email))
-                .ReturnsAsync(new User {Email = "test@cafe.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("aidodeptraisieucapvutru")});
+                .ReturnsAsync(new User { Email = "test@cafe.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("aidodeptraisieucapvutru") });
         var authService = new AuthService(mockRepo.Object, new Mock<ITokenService>().Object, new Mock<IBruteForceService>().Object, new Mock<IConfiguration>().Object);
+        //Invoking đòi hỏi trước tiên hàm Login phải thực hiện trước đã, rồi mới thực hiện Fact này
         await authService.Invoking(s => s.Login(request))
                          .Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+    [Fact]
+    public async Task Login_WithinPenaltyTime_ThrowsException()
+    {
+        // 1. ARRANGE: Dựng hiện trường
+        var request = new LoginRequests { Email = "test@cafe.com", Password = "SomePassword123" };
+
+        // Tạo 1 User giả đang bị khóa (Mãn hạn tù vào 15 phút nữa)
+        var fakeUser = new User
+        {
+            Email = request.Email,
+            PasswordHash = "hashed_pass",
+            LockoutEnd = DateTime.UtcNow.AddMinutes(15)
+        };
+
+        var mockRepo = new Mock<IUserRepository>();
+        var mockTokenService = new Mock<ITokenService>();
+        var mockBruteForceService = new Mock<IBruteForceService>();
+        var mockConfig = new Mock<IConfiguration>();
+
+        // Dạy Repo: Khi ai hỏi email này thì đưa fakeUser ra
+        mockRepo.Setup(r => r.GetUserByEmail(request.Email))
+                .ReturnsAsync(fakeUser);
+
+        // Dạy BruteForceService báo cáo là TÀI KHOẢN ĐANG BỊ KHÓA
+        mockBruteForceService.Setup(b => b.IsAccountLocked(fakeUser))
+                             .ReturnsAsync(true);
+
+        // Khởi tạo đúng cái AuthService (Lễ tân)
+        var authService = new AuthService(mockRepo.Object, mockTokenService.Object, mockBruteForceService.Object, mockConfig.Object);
+
+        // 2 & 3. ACT & ASSERT: Gọi hàm Login và bắt Exception
+        await authService.Invoking(s => s.Login(request))
+                         .Should().ThrowAsync<UnauthorizedAccessException>()
+                         .WithMessage("Tài khoản đã bị khóa*");
     }
 }

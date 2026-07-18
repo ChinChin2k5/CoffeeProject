@@ -3,7 +3,7 @@ const rawRole = localStorage.getItem("userRole");
 const safeRole = rawRole ? rawRole.toLowerCase() : null; 
 const currentPath = window.location.pathname.toLowerCase(); 
 
-alert("Đang đứng ở: " + currentPath + "\nThẻ đang cầm: " + safeRole);
+//alert("Đang đứng ở: " + currentPath + "\nThẻ đang cầm: " + safeRole);
 
 // 2. Bao trọn ổ mọi đường dẫn có thể là Sảnh Lễ Tân
 const isAtRoot = currentPath === '/' || currentPath === '/index.html' || currentPath === '/login.html';

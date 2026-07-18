@@ -21,7 +21,7 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold text-gray-800">Quán Cà Phê</h1>
-                <p class="text-sm text-gray-500">Nhân Viênn</p>
+                <p class="text-sm text-gray-500">Nhân Viên</p>
             </div>
         </div>
         
@@ -46,7 +46,7 @@
             </div>
             
             <!-- Danh sách món (Ví dụ) -->
-            <div class="grid grid-cols-3 gap-4">
+            <div id="product-container" class="grid grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition">
                     <div class="bg-amber-100 h-32 rounded-lg mb-4 flex items-center justify-center">☕️</div>
                     <h3 class="font-bold text-gray-800">Espresso</h3>
@@ -58,42 +58,37 @@
 
         <!-- CỘT PHẢI: HÓA ĐƠN (Current Order) -->
         <div class="w-1/3 bg-white border-l flex flex-col">
-            <div class="p-6 border-b flex-1">
-                <h2 class="text-xl font-bold text-gray-800 mb-1">Current Order</h2>
-                <p class="text-sm text-gray-500 mb-4">2 items</p>
+            <div class="p-6 border-b flex-1 flex flex-col overflow-hidden">
+                <h2 class="text-xl font-bold text-gray-800 mb-1">Đơn Hiện Tại</h2>
+                <p id="cart-count" class="text-sm text-gray-500 mb-4">0 món</p>
                 
-                <!-- Item trong giỏ -->
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
-                    <div>
-                        <h4 class="font-bold text-gray-800">Espresso</h4>
-                        <p class="text-sm text-gray-500">$3.50 each</p>
+                <div id="cart-items" class="flex-1 overflow-y-auto space-y-2 pr-2">
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400">
+                        <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <p>Giỏ hàng đang trống</p>
                     </div>
-                    <div class="font-bold text-gray-800">$3.50</div>
                 </div>
             </div>
-
-            <!-- Tổng tiền & Nút thanh toán -->
+        
             <div class="p-6 bg-gray-50 border-t">
                 <div class="flex justify-between mb-2 text-gray-600">
-                    <span>Subtotal</span>
-                    <span class="font-bold">$8.00</span>
+                    <span>Tạm tính</span>
+                    <span id="subtotal" class="font-bold">0đ</span>
                 </div>
                 <div class="flex justify-between mb-4 text-gray-600">
                     <span>Tax (8%)</span>
-                    <span class="font-bold">$0.64</span>
+                    <span id="tax" class="font-bold">0đ</span>
                 </div>
                 <div class="flex justify-between mb-6 text-xl">
-                    <span class="font-bold text-gray-800">Total</span>
-                    <span class="font-bold text-amber-600">$8.64</span>
+                    <span class="font-bold text-gray-800">Tổng tiền</span>
+                    <span id="total" class="font-bold text-amber-600 text-2xl">0đ</span>
                 </div>
                 
-                <!-- NÚT BẬT MODAL QR -->
-                <button id="btnShowQR" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl mb-3 shadow-lg flex items-center justify-center gap-2 transition">
+                <button id="btnShowQR" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl mb-3 shadow-lg flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                    QR Payment
-                    <!-- Chỗ này để hứng cái hình QR hiện ra -->
+                    Thanh toán QR
                 </button>
-                <button class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition">Void Order</button>
+                <button id="btnVoidOrder" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition active:scale-95">Hủy đơn</button>
             </div>
         </div>
     </main>
@@ -117,12 +112,12 @@
             </div>
             
             <div class="text-center mb-6">
-                <p class="text-4xl font-bold text-gray-800 mb-2">$8.64</p>
-                <p class="text-sm text-gray-500">Customer scans this QR code to complete payment</p>
+                <p id="qr-total" class="text-4xl font-bold text-gray-800 mb-2">0đ</p>
+                <p class="text-sm text-gray-500">Khách hàng sử dụng App Ngân hàng để quét mã</p>
             </div>
             
             <button id="btnConfirmPay" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
-                Confirm Payment Received
+                Xác Nhận Đã Nhận Tiền
             </button>
         </div>
     </div>
@@ -163,6 +158,6 @@ new QRCode(document.getElementById("qrcodeBox"), {
 });
     </script>
      <script src="../src/js/logout.js"></script>
-    
+     <script src="/src/js/staff.js"></script>
 </body>
 </html>

@@ -14,5 +14,12 @@ namespace CoffeeShop.DAL.Repositories
         {
             return await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == Id);
         }
+        // --- HÀM MỚI TOANH ĐỂ LẤY TOÀN BỘ MENU ---
+        public async Task<List<Product>> GetAllProductsWithCategoryAsync()
+        {
+            return await _dbContext.Products
+                .Include(p => p.Category) // Lôi thằng Category đi theo để lấy tên nhóm cà phê
+                .ToListAsync();
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace CoffeeShop.Models.Entities.Catalog
         public int DisplayOrder { get; set; }
         public bool IsActive { get; set; }
         //Lý do để dấu bằng là để tránh lỗi Null
-        public virtual ICollection<Product> Products { get; set;}
+        // Trong file Category.cs
+public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

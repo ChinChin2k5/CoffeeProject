@@ -4,10 +4,10 @@ namespace CoffeeShop.BLL.Interfaces
 {
     public interface IBruteForceService
     {
-        Task<bool> IsAccountLocked(string email);
+        Task<bool> IsAccountLocked(User user);
 
-        Task CountBruteForce(string email);
+        Task CountBruteForce(User user);
 
-        Task ResetFalledAttemptAsync(string email);
+        Task ResetFalledAttemptAsync(User user);
     }
 }

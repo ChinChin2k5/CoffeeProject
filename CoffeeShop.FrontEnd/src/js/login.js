@@ -113,11 +113,11 @@ function cancelPress() {
     logo.classList.replace('scale-95', 'scale-100');
 }
 
-logo.addEventListener('mousedown', startPress);
+/*logo.addEventListener('mousedown', startPress);
 logo.addEventListener('mouseup', cancelPress);
 logo.addEventListener('mouseleave', cancelPress);
 logo.addEventListener('touchstart', startPress, {passive: false});
-logo.addEventListener('touchend', cancelPress);
+logo.addEventListener('touchend', cancelPress);*/
 
 function closeAdminModal() {
     adminModal.classList.add('hidden');

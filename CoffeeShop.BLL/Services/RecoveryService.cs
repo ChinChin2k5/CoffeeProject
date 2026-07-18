@@ -1,6 +1,8 @@
-using CoffeeShop.DAL.Repositories;
+/*using CoffeeShop.DAL.Repositories;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
 using CoffeeShop.BLL;
+using CoffeeShop.Models.Entities.Auth;
+
 
 // Nên có cái namespace để bọc class lại cho chuẩn kiến trúc nhé
 namespace CoffeeShop.BLL.Services
@@ -19,7 +21,7 @@ namespace CoffeeShop.BLL.Services
         // ==========================================
         // NHỊP 1: API /forgot-password sẽ gọi hàm này
         // ==========================================
-        public async Task<bool> GenerateAndSendOtpAsync(string email) 
+        public async Task<bool> GenerateAndSendOtpAsync(User user) 
         {
             var user = await _account.FindByEmailAsync(email); 
             if (user == null) return false;
@@ -40,7 +42,7 @@ namespace CoffeeShop.BLL.Services
         // ==========================================
         // NHỊP 2: API /reset-password sẽ gọi hàm này
         // ==========================================
-        public async Task<bool> VerifyAndResetPasswordAsync(string email, int userOtp, string newPasswordHash)
+        public async Task<bool> VerifyAndResetPasswordAsync(User user)
         {
             var user = await _account.FindByEmailAsync(email);
             if (user == null) return false;
@@ -55,4 +57,4 @@ namespace CoffeeShop.BLL.Services
             return await _account.UpdateAccountPasswordAsync(email, newPasswordHash);
         }
     }
-}
+}*/

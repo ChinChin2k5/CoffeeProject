@@ -35,18 +35,18 @@ namespace CoffeeShop.BLL.Services
             {
                 return null;
             }
-            if (await _bruteForceService.IsAccountLocked(userInDb.Email))
+            if (await _bruteForceService.IsAccountLocked(userInDb))
             {
-                throw new Exception("Tài khoản đã bị khóa do sai quá 5 lần!");
+                throw new UnauthorizedAccessException("Tài khoản đã bị khóa 15 phút do nhập sai quá 5 lần. Vui lòng thử lại sau!");
             }
             bool isMatch = BCrypt.Net.BCrypt.Verify(request.Password, userInDb.PasswordHash);
             // 3. So sánh Password truyền vào với PasswordHash lấy từ Database lên
             if (!isMatch)
             {
-                await _bruteForceService.CountBruteForce(userInDb.Email);
+                await _bruteForceService.CountBruteForce(userInDb);
                 throw new UnauthorizedAccessException("Sai mật khẩu!");
             }
-            await _bruteForceService.ResetFalledAttemptAsync(userInDb.Email);
+            await _bruteForceService.ResetFalledAttemptAsync(userInDb);
             string realToken = _tokenService.GenerateJwtToken(userInDb.Email, userInDb.Role);
             return new LoginResponses
             {

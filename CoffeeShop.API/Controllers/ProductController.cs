@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CoffeeShop.DAL.Repositories; // Chỉnh lại theo namespace DB Context của sếp
+using CoffeeShop.DAL.Repositories; 
 using Microsoft.AspNetCore.Authorization;
 
 namespace CoffeeShop.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    // [Authorize] // Tạm thời comment cái này lại để test cho dễ, lấy được data lên hình rồi hẵng bật lại bảo vệ sau
+    // [Authorize] 
     public class ProductController : ControllerBase
     {
         private readonly ProductDAL _productDAL;

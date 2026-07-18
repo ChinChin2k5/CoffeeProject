@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
+using CoffeeShop.BLL.Interfaces;
 using CoffeeShop.DAL;
 using CoffeeShop.Models.Entities.Auth;
 using System.Text;                          // BỔ SUNG: Để dùng Encoding
@@ -10,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;      // BỔ SUNG: Để dùng JwtSecurit
 using Microsoft.Extensions.Configuration;   // BỔ SUNG: Để dùng IConfiguration
 namespace CoffeeShop.BLL.Services
 {
-    public class TokenService
+    public class TokenService : ITokenService
     {
         // 1. Khai báo biến toàn cục để giữ cái "máy đọc cấu hình"
         private readonly IConfiguration _configuration;

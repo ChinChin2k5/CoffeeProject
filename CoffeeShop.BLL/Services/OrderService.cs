@@ -22,10 +22,12 @@ public class OrderService
         //Mon chinh
         var newOrder = new Order
         {
+            CustomerId = request.CustomerId,
             Id = Guid.NewGuid(),
             CreateDate = DateTime.UtcNow,
             Status = 1, //1 la Pending
             TotalAmount = productEntity.Price * request.Quantity,
+            PaymentMethod = request.PaymentMethod,
         };
         //Mon phu
         var newOrderDetail = new OrderDetail
