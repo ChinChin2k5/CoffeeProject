@@ -28,7 +28,7 @@ namespace CoffeeShop.API.OrderController
                 var responseDto = await _orderService.CreateNewOrderAsync(request);
                 // 3. Trả về mã 201 kèm cái hóa đơn cho Frontend in ra bill
                 return StatusCode(201, new {
-                    message = "Ok rồi nhé thằng loz, bill của mày đây",
+                    message = "Ok rồi nhé, bill của bro đây",
                     data = responseDto
                 });
             } catch (Exception ex)
