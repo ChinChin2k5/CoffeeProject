@@ -8,7 +8,8 @@ using CoffeeShop.DAL.Data;
 using CoffeeShop.DAL.Repositories; 
 using CoffeeShop.DAL.Interfaces;   
 using CoffeeShop.BLL.Services;     
-using CoffeeShop.BLL.Interfaces;   
+using CoffeeShop.BLL.Interfaces; 
+using Microsoft.OpenApi;  
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,7 +92,31 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c => 
+{
+    // Bước 1: Định nghĩa giao diện ổ khóa bảo mật cho Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"Đăng nhập lấy Token xong thì ném vào đây. 
+                        Cú pháp chuẩn: Bearer {token vừa lấy}
+                        Ví dụ: Bearer eyJhbGciOiJIUzI1...",
+        Name = "Authorization",
+        //Hai đoạn In & Type và cả Bearer có nghĩa là Swagger cần loại hình bảo mật tên là ApiKey, và người dùng có nghĩa vụ cung cấp chuỗi token đó vào đây
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    // Bước 2: Ép Swagger tự động nhét Token vào HTTP Header khi gọi API
+    // Cấu hình chuẩn giúp Swagger tự động nhét Token vào HTTP Header
+c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+{
+    {
+        new Microsoft.OpenApi.OpenApiSecuritySchemeReference("Bearer", document),
+        new List<string>() // Sử dụng đúng kiểu List<string> theo yêu cầu của hệ thống
+    }
+
+});
+});
 builder.Services.AddScoped<AccountRepository>();
 builder.Services.AddScoped<EmailService>();
 //builder.Services.AddScoped<RecoveryService>();

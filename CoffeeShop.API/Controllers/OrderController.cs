@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
 using CoffeeShop.BLL;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
 namespace CoffeeShop.API.OrderController 
 {
     [ApiController]
@@ -15,17 +19,27 @@ namespace CoffeeShop.API.OrderController
             _orderService = orderService;
         }
         [HttpPost("order")]
-        public async Task<IActionResult> CustomerOrder([FromBody] CustomerRequest request) 
+        [Authorize(Roles = "Staff")] // Bắt buộc phải kẹp Token vào mới cho chạy
+        public async Task<IActionResult> CustomerOrder([FromBody] CreateOrderRequest request) 
         {
-            if (request == null || request.ProductId <= 0 || request.Quantity <= 0)
+            if (request == null)
             {
-                return BadRequest(new { message = "Mày đã order đâu hoặc order láo hả thằng loz" });
+                return BadRequest(new { message = "Mày đã order đâu" });
             }
             try 
             {
+                // Hứng Token do Auth nhả ra để đảm bảo tính nhất quán
+                var staffIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                // 2. Chuyển thành số và kiểm tra. 
+// Chú ý: Cụm "out int staffId" sẽ tự động sinh ra biến staffId để dùng ở các dòng bên dưới!
+if (!int.TryParse(staffIdClaim, out int staffId))
+{
+    return Unauthorized(new { message = "Token không chứa ID nhân viên hợp lệ hoặc không có quyền!" });
+}
+                
                 // 2. Ném hộp xuống tầng BLL (OrderService) để nó xử lý DB và tính tiền.
-                // Hứng lại cái hóa đơn (CustomerResponse) từ BLL trả lên.
-                var responseDto = await _orderService.CreateNewOrderAsync(request);
+                // Hứng lại cái hóa đơn từ BLL trả lên.
+                var responseDto = await _orderService.CreateNewOrderAsync(request, staffId);
                 // 3. Trả về mã 201 kèm cái hóa đơn cho Frontend in ra bill
                 return StatusCode(201, new {
                     message = "Ok rồi nhé, bill của bro đây",
