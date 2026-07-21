@@ -127,6 +127,9 @@ builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<StaffDAL>();
 builder.Services.AddScoped<BruteForceDAL>();
 builder.Services.AddScoped<PasswordHasher>();
+builder.Services.AddScoped<ProductRecipeDAL>();
+builder.Services.AddScoped<StoreInventoryDAL>();
+
 // "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -164,24 +167,7 @@ app.UseAuthorization();
 
 app.MapControllers(); 
 
-//Kích hoạt Seeding Động
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-        var config = services.GetRequiredService<IConfiguration>();
-        
-        // Bấm nút khởi động máy bơm!
-        DbSeeder.SeedData(context, config);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Có biến lúc bơm dữ liệu Seeding rồi sếp ơi!");
-    }
-}
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -191,7 +177,7 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<AppDbContext>(); 
         
         // GỌI HÀM SEED Ở ĐÂY NÀY!
-        DbInitializer.Seed(context); 
+        DbInitializer.Seed(context, app.Configuration); 
     }
     catch (Exception ex)
     {

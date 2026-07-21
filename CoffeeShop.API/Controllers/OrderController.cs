@@ -36,10 +36,13 @@ if (!int.TryParse(staffIdClaim, out int staffId))
 {
     return Unauthorized(new { message = "Token không chứa ID nhân viên hợp lệ hoặc không có quyền!" });
 }
+// 2. BÓC LUÔN STAFF NAME TỪ TOKEN
+                // Dùng ClaimTypes.Name, nếu không có thì fallback về "Nhân viên Vô Danh" để bill không bị null
+                var staffName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Nhân viên Vô Danh";
                 
                 // 2. Ném hộp xuống tầng BLL (OrderService) để nó xử lý DB và tính tiền.
                 // Hứng lại cái hóa đơn từ BLL trả lên.
-                var responseDto = await _orderService.CreateNewOrderAsync(request, staffId);
+                var responseDto = await _orderService.CreateNewOrderAsync(request, staffId, staffName);
                 // 3. Trả về mã 201 kèm cái hóa đơn cho Frontend in ra bill
                 return StatusCode(201, new {
                     message = "Ok rồi nhé, bill của bro đây",
