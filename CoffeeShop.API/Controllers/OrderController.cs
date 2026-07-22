@@ -5,6 +5,8 @@ using CoffeeShop.BLL;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using CoffeeShop.Models.Entities.Enums;
+
 
 namespace CoffeeShop.API.OrderController 
 {
@@ -54,5 +56,72 @@ if (!int.TryParse(staffIdClaim, out int staffId))
         return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpPost("confirm-payment")]
+public async Task<IActionResult> ConfirmPayment([FromBody] ConfirmPaymentRequest request)
+{
+    try
+    {
+        // Bước 1: Lễ tân gọi BLL xử lý
+        var response = await _orderService.ConfirmPaymentAsync(request);
+        
+        // Bước 6: Nhẹ nhàng return Ok
+        return Ok(response);
+    }
+    catch (Exception ex)
+    {
+        // Tạm thời dùng try-catch để map lỗi từ Bước 3 ra HTTP Status Code
+        if (ex.Message == "Order_Not_Found")
+        {
+            return NotFound(new { error = "Không tìm thấy hoá đơn này!" });
+        }
+        if (ex.Message == "Order_Already_Paid")
+        {
+            return BadRequest(new { error = "Hoá đơn này đã được thanh toán từ trước!" });
+        }
+        
+        // Cứu cánh cuối cùng cho lỗi không lường trước
+        return StatusCode(500, new { error = "Lỗi hệ thống: " + ex.Message });
+    }
+}
+[HttpPost("{orderId}/cancel")]
+[Authorize(Roles = "Staff,Manager")] // Kẹp Token vào, cho phép cả Staff và Manager hủy đơn
+public async Task<IActionResult> CancelOrder(Guid orderId)
+{
+    try
+    {
+        // 1. Tận dụng tuyệt chiêu bóc Token xịn sò của đệ
+        var staffIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(staffIdClaim, out int staffId))
+        {
+            return Unauthorized(new { message = "Token không chứa ID nhân viên hợp lệ hoặc không có quyền!" });
+        }
+
+        // 2. Gọi BLL xử lý nghiệp vụ hủy đơn và nhả kho
+        bool result = await _orderService.CancelOrderAsync(orderId, staffId);
+        
+        if (result)
+        {
+            return Ok(new 
+            { 
+                success = true, 
+                message = "Hủy đơn hàng và hoàn trả nguyên liệu thành công!" 
+            });
+        }
+        
+        return BadRequest(new { success = false, message = "Có lỗi xảy ra, không thể hủy đơn hàng." });
+    }
+    catch (Exception ex)
+    {
+        // Chỉ những lỗi do chính tay mình chủ động ném ra (rào chắn) mới cho hiển thị lên Frontend
+        if (ex.Message.Contains("Cảnh báo bảo mật") || ex.Message.Contains("Không tìm thấy"))
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+        
+        // Sẵn tiện ghi log lại lỗi thật (ex) vào file hoặc Console để anh em Dev tự đọc.
+        Console.WriteLine($"[LỖI HỆ THỐNG - CancelOrder] {ex.ToString()}");
+        return StatusCode(500, new { success = false, message = "Đã có lỗi hệ thống xảy ra, vui lòng thử lại sau!" });
+    }
+}
     }
 }
