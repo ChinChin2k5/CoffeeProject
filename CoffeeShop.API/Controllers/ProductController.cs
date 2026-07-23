@@ -10,17 +10,17 @@ namespace CoffeeShop.API.Controllers
     // [Authorize] 
     public class ProductController : ControllerBase
     {
-        private readonly ProductDAL _productDAL;
+        private readonly ProductRepository _productRepo;
 
-        public ProductController(ProductDAL productDAL)
+        public ProductController(ProductRepository productRepo)
         {
-            _productDAL = productDAL;
+            _productRepo = productRepo;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
-            var products = await _productDAL.GetAllProductsWithCategoryAsync();
+            var products = await _productRepo.GetAllProductsWithCategoryAsync();
             // 2. Định hình lại gói hàng (Flat JSON) để ném ra cho Frontend dễ nuốt
             var result = products.Select(p => new {
                 id = p.Id,

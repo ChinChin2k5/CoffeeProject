@@ -120,15 +120,15 @@ c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
 builder.Services.AddScoped<AccountRepository>();
 builder.Services.AddScoped<EmailService>();
 //builder.Services.AddScoped<RecoveryService>();
-builder.Services.AddScoped<OrderDAL>();
+builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<ProductDAL>();
+builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddScoped<StaffService>();
-builder.Services.AddScoped<StaffDAL>();
-builder.Services.AddScoped<BruteForceDAL>();
+builder.Services.AddScoped<StaffRepository>();
+builder.Services.AddScoped<BruteForceRepository>();
 builder.Services.AddScoped<PasswordHasher>();
-builder.Services.AddScoped<ProductRecipeDAL>();
-builder.Services.AddScoped<StoreInventoryDAL>();
+builder.Services.AddScoped<ProductRecipeRepository>();
+builder.Services.AddScoped<StoreInventoryRepository>();
 
 // "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"
 builder.Services.AddScoped<IUserRepository, UserRepository>();
