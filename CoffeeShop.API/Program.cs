@@ -140,6 +140,8 @@ builder.Services.AddScoped<IBruteForceService, BruteForceService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 // CoffeeShop.BLL.TokenService từ trái qua là namespace tức hộ khẩu của nó !
 builder.Services.AddScoped<TokenService>();
+// Đăng ký Repository với vòng đời Scoped (mỗi HTTP Request tạo 1 instance)
+builder.Services.AddScoped<ISystemAuditLogRepository, SystemAuditLogRepository>();
 
 
 
