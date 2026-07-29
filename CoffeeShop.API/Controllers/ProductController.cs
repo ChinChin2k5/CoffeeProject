@@ -21,7 +21,7 @@ namespace CoffeeShop.API.Controllers
         public async Task<IActionResult> GetAllProducts()
         {
             var products = await _productRepo.GetAllProductsWithCategoryAsync();
-            // 2. Định hình lại gói hàng (Flat JSON) để ném ra cho Frontend dễ nuốt
+            // 2. Định hình lại gói hàng (Flat JSON) để ném ra cho Frontend 
             var result = products.Select(p => new {
                 id = p.Id,
                 name = p.Name,

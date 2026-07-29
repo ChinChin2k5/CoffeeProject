@@ -157,7 +157,7 @@ if (app.Environment.IsDevelopment())
 }
 //Cho phép riêng cổng 5173 được chạy cùng cổng 5079 của backend
 app.UseCors("AllowViteApp");
-
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 // Gọi hàm chống bruteforce
 app.UseRateLimiter();
