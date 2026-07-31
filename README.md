@@ -50,10 +50,14 @@ Prerequisites
  + PostgreSQL running on your local machine.
 
 Setup Backend
-1. Configure Database: Update the DefaultConnection string in CoffeeShop.API/appsettings.json.
-2. Apply Migrations:
-cd CoffeeShop.API
-dotnet ef database update --project ../CoffeeShop.DAL
+1. **Configure Secure Settings:**
+   - Copy the provided `appsettings.json` to a new file named `appsettings.Development.json`.
+   - Update the `DefaultConnection` string and `JwtSettings` in the new `appsettings.Development.json` file. 
+   *(Note: This file is git-ignored to prevent credential leaks).*
+**Apply Migrations:**
+   ```bash
+   cd CoffeeShop.API
+   dotnet ef database update --project ../CoffeeShop.DAL
 3. Run the API & Tests:
 dotnet run --project CoffeeShop.API
 dotnet test ../CoffeeShop.Tests
