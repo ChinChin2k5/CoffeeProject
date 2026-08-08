@@ -121,6 +121,7 @@ builder.Services.AddScoped<AccountRepository>();
 builder.Services.AddScoped<EmailService>();
 //builder.Services.AddScoped<RecoveryService>();
 builder.Services.AddScoped<OrderRepository>();
+builder.Services.AddScoped<InventoryRepository>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddScoped<StaffService>();

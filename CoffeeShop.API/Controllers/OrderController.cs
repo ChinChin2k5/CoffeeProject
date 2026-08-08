@@ -38,6 +38,7 @@ if (!int.TryParse(staffIdClaim, out int staffId))
 {
     return Unauthorized(new { message = "Token không chứa ID nhân viên hợp lệ hoặc không có quyền!" });
 }
+
 // 2. BÓC LUÔN STAFF NAME TỪ TOKEN
                 // Dùng ClaimTypes.Name, nếu không có thì fallback về "Nhân viên Vô Danh" để bill không bị null
                 var staffName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Nhân viên Vô Danh";
@@ -122,6 +123,75 @@ public async Task<IActionResult> CancelOrder(Guid orderId)
         Console.WriteLine($"[LỖI HỆ THỐNG - CancelOrder] {ex.ToString()}");
         return StatusCode(500, new { success = false, message = "Đã có lỗi hệ thống xảy ra, vui lòng thử lại sau!" });
     }
+}
+[HttpGet("test-race-condition")]
+[Authorize(Roles = "Staff")] // Chơi khắt khe y như hàm gốc luôn
+public async Task<IActionResult> TestRaceCondition()
+{
+    // Đệ TỰ GÕ lại cổng nhé, cấm copy!
+    string apiUrl = "http://localhost:5059/api/Order/order"; 
+    
+    var httpClient = new HttpClient();
+
+    // ======================================================
+    // 1. TỰ ĐỘNG LẤY THẺ TỪ SWAGGER VÀ TẨY TRẦN UNICODE
+    // ======================================================
+    var authHeader = Request.Headers["Authorization"].ToString();
+    if (!string.IsNullOrEmpty(authHeader))
+    {
+        var rawToken = authHeader.Replace("Bearer", "").Trim();
+        var cleanToken = new string(rawToken.Where(c => c >= 32 && c <= 126).ToArray());
+        httpClient.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", cleanToken);
+    }
+
+    var tasks = new List<Task<HttpResponseMessage>>();
+    Console.WriteLine("Bắt đầu khởi tạo 10 request đặt hàng cùng lúc...");
+
+    for (int i = 0; i < 10; i++)
+    {
+        // 2. TẠO PAYLOAD BẰNG OBJECT (Miễn nhiễm ma Unicode)
+        var payload = new 
+        {
+            customerId = 1,
+            storeId = 1,
+            paymentMethod = "Tiền mặt",
+            items = new[] 
+            {
+                new 
+                {
+                    productId = 5, 
+                    quantity = 1,
+                    toppings = new[] 
+                    {
+                        new { productId = 13, quantity = 1 }
+                    }
+                }
+            }
+        };
+
+        var content = JsonContent.Create(payload);
+        tasks.Add(httpClient.PostAsync(apiUrl, content));
+    }
+
+    var results = await Task.WhenAll(tasks);
+
+    int successCount = results.Count(r => r.IsSuccessStatusCode);
+    int failCount = results.Count(r => !r.IsSuccessStatusCode);
+
+    var firstFailed = results.FirstOrDefault(r => !r.IsSuccessStatusCode);
+    string reason = "Không có lỗi (10 đơn vào trót lọt!)";
+    if (firstFailed != null)
+    {
+        reason = $"Mã lỗi: {firstFailed.StatusCode} - Chi tiết: {await firstFailed.Content.ReadAsStringAsync()}";
+    }
+
+    return Ok(new { 
+        Message = "Test Race Condition Hoàn Tất!", 
+        DonHangThanhCong = successCount, 
+        DonHangThatBai = failCount,
+        LyDoThatBai = reason
+    });
 }
     }
 }
