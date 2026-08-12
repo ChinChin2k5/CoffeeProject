@@ -3,11 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
-using Microsoft.IdentityModel.Tokens;
 using CoffeeShop.BLL.Interfaces;
-using CoffeeShop.DAL.Interfaces;
-using CoffeeShop.DAL.Data;
-using CoffeeShop.DAL.Repositories;
 using CoffeeShop.BLL.Services;
 
 namespace CoffeeShop.API.Controllers

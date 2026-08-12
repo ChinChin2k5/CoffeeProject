@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using CoffeeShop.DAL.Repositories; 
-using Microsoft.AspNetCore.Authorization;
 
 namespace CoffeeShop.API.Controllers
 {
