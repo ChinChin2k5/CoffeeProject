@@ -55,19 +55,27 @@ if (!int.TryParse(staffIdClaim, out int staffId))
             }
         }
         [HttpPost("confirm-payment")]
+        [Authorize(Roles = "Staff,Manager")]
 public async Task<IActionResult> ConfirmPayment([FromBody] ConfirmPaymentRequest request)
 {
     try
     {
-        // Bước 1: Lễ tân gọi BLL xử lý
-        var response = await _orderService.ConfirmPaymentAsync(request);
+        // BƯỚC 3: Móc thẻ ngành ra tự bóc ID và Tên (Y hệt hàm Order)
+        var staffIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(staffIdClaim, out int staffId))
+        {
+            return Unauthorized(new { message = "Token không chứa ID nhân viên hợp lệ hoặc không có quyền!" });
+        }
+
+        var staffName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Nhân viên Vô Danh";
+
+        // BƯỚC 4: Lễ tân gọi BLL xử lý, truyền cục data vừa bóc được từ Token xuống
+        var response = await _orderService.ConfirmPaymentAsync(request, staffId, staffName);
         
-        // Bước 6: Nhẹ nhàng return Ok
         return Ok(response);
     }
     catch (Exception ex)
     {
-        // Tạm thời dùng try-catch để map lỗi từ Bước 3 ra HTTP Status Code
         if (ex.Message == "Order_Not_Found")
         {
             return NotFound(new { error = "Không tìm thấy hoá đơn này!" });
@@ -77,7 +85,6 @@ public async Task<IActionResult> ConfirmPayment([FromBody] ConfirmPaymentRequest
             return BadRequest(new { error = "Hoá đơn này đã được thanh toán từ trước!" });
         }
         
-        // Cứu cánh cuối cùng cho lỗi không lường trước
         return StatusCode(500, new { error = "Lỗi hệ thống: " + ex.Message });
     }
 }

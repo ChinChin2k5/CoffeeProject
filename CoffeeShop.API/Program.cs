@@ -130,6 +130,8 @@ builder.Services.AddScoped<BruteForceRepository>();
 builder.Services.AddScoped<PasswordHasher>();
 builder.Services.AddScoped<ProductRecipeRepository>();
 builder.Services.AddScoped<StoreInventoryRepository>();
+builder.Services.AddScoped<SystemAuditLogRepository>();
+
 
 // "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"
 builder.Services.AddScoped<IUserRepository, UserRepository>();
