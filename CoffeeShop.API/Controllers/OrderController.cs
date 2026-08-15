@@ -128,5 +128,22 @@ public async Task<IActionResult> CancelOrder(Guid orderId)
         return StatusCode(500, new { success = false, message = "Đã có lỗi hệ thống xảy ra, vui lòng thử lại sau!" });
     }
 }
+[HttpGet]
+[Authorize(Roles = "Manager,Staff")] // Cho phép Quản lý và Nhân viên xem
+public async Task<IActionResult> GetAllOrders()
+{
+    try
+    {
+        // Gọi Service lấy danh sách
+        var orders = await _orderService.GetOrderSummariesAsync();
+        
+        // Trả về JSON bọc trong biến 'data' (để khớp với code JavaScript result.data)
+        return Ok(new { data = orders });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
+    }
+}
     }
 }
