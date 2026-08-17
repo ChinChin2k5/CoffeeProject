@@ -145,5 +145,17 @@ public async Task<IActionResult> GetAllOrders()
         return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
     }
 }
+[HttpGet("store/{storeId}")] // Đường dẫn sẽ là /api/Order/store/1
+[Authorize(Roles = "Manager, Staff")]
+public async Task<IActionResult> GetOrdersByStore(int storeId)
+{
+    // Đệ gọi xuống Service/Repo để lấy đơn hàng where StoreId == storeId
+    var orders = await _orderService.GetOrdersByStoreIdAsync(storeId);
+    
+    return Ok(new {
+        message = $"Lấy đơn hàng chi nhánh {storeId} thành công",
+        data = orders
+    });
+}
     }
 }
