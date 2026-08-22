@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using CoffeeShop.BLL.Services;
+using System.Security.Claims;
+using CoffeeShop.BLL.DTOs.Inventory.Requests;
+
 // Nhớ using BLL Services nếu chưa có nhé đệ
 
 namespace CoffeeShop.API.ManagerController 
@@ -9,11 +13,20 @@ namespace CoffeeShop.API.ManagerController
     public class ManagerController : ControllerBase
     {
         private readonly InventoryService _inventoryService;
+        private readonly UserProfileService _userprofileService;
+
+        private readonly SystemAuditLogService _auditLogService;
+
+        private readonly ManagerService _managerService;
+
         
         // DI tiêm Service vào Controller
-        public ManagerController(InventoryService inventoryService)
+        public ManagerController(InventoryService inventoryService, UserProfileService userprofileService, SystemAuditLogService auditLogService, ManagerService managerService)
         {
             _inventoryService = inventoryService;
+            _userprofileService = userprofileService;
+            _auditLogService = auditLogService;
+            _managerService = managerService;
         }
 
         [Authorize(Roles = "Manager")]
@@ -31,6 +44,7 @@ namespace CoffeeShop.API.ManagerController
         [HttpGet("inventory-transactions")]
         public async Task<IActionResult> GetInventoryTransactions()
         {
+            
             try
             {
                 // Controller gọi Service, Service gọi Repo, mượt mà chuẩn 3-Tier!
@@ -69,6 +83,120 @@ namespace CoffeeShop.API.ManagerController
             {
                 return BadRequest(new { message = ex.Message });
             }
-        } 
+        }
+        [HttpGet("staffs")]
+    public async Task<IActionResult> GetStaffs()
+    {
+        try
+        {
+            var staffList = await _managerService.GetAllStaffsWithShiftDataAsync();
+            // 👈 Bắt buộc bọc new { data = staffList } vì JS đang đọc result.data
+            return Ok(new { data = staffList }); 
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Lỗi Server: " + ex.Message });
+        }
     }
+    [HttpGet("me")]
+[Authorize] // Bắt buộc có vé
+public async Task<IActionResult> GetMyProfile()
+{
+    try
+    {
+        // 1. Controller chỉ làm nhiệm vụ bóc vé lấy Email
+        var email = User.FindFirst(ClaimTypes.Email)?.Value 
+                 ?? User.FindFirst(ClaimTypes.Name)?.Value; 
+
+        if (string.IsNullOrEmpty(email)) 
+            return Unauthorized(new { message = "Token không hợp lệ hoặc thiếu Email" });
+
+        // 2. Controller sai khiến Service đi lấy dữ liệu
+        var myInfo = await _userprofileService.GetMyProfileAsync(email);
+
+        if (myInfo == null) 
+            return NotFound(new { message = "Không tìm thấy người dùng" });
+
+        // 3. Trả hàng về cho Frontend
+        return Ok(new { data = myInfo });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Lỗi Server: " + ex.Message });
+    }
+} 
+[HttpGet("system-warnings")]
+    [Authorize(Roles = "Manager")]
+    public async Task<IActionResult> GetSystemWarnings()
+    {
+        try
+        {
+            // Controller cực nhàn, chỉ gọi BLL và bọc kết quả lại
+            var warnings = await _auditLogService.GetRecentWarningsAsync(3);
+            return Ok(new { data = warnings });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
+        }
+    }
+    [HttpPost("adjust-inventory")]
+        [Authorize(Roles = "Manager")] // Rào kẽm gai: Chỉ Manager mới được qua
+        public async Task<IActionResult> AdjustInventory([FromBody] AdjustInventoryRequest request)
+        {
+            try
+            {
+                // Bóc ID và Tên của Manager từ Token
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userNameClaim = User.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown Manager";
+
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized(new { message = "Token không hợp lệ!" });
+
+                int managerId = int.Parse(userIdClaim);
+
+                // Ném xuống cho Service xử lý
+                await _managerService.AdjustInventoryAsync(managerId, userNameClaim, request);
+
+                return Ok(new 
+                { 
+                    success = true, 
+                    message = "Điều chỉnh kho thành công! Đã ghi nhận vào sổ cái." 
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpGet("receipts-audit")]
+[Authorize(Roles = "Manager")] // Chỉ Manager mới được soi
+public async Task<IActionResult> GetReceiptsForAudit()
+{
+    try
+    {
+        var data = await _managerService.GetReceiptsForAuditAsync();
+        return Ok(new { success = true, data = data });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { success = false, message = ex.Message });
+    }
+}
+[HttpGet("cash-alerts")]
+[Authorize(Roles = "Manager")]
+public async Task<IActionResult> GetCashAlerts()
+{
+    try
+    {
+        var alerts = await _managerService.GetTodayCashAlertsAsync();
+        return Ok(new { success = true, data = alerts });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { success = false, message = ex.Message });
+    }
+}
+    }
+    
 }

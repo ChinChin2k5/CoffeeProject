@@ -90,7 +90,7 @@ public async Task<IActionResult> ConfirmPayment([FromBody] ConfirmPaymentRequest
 }
 [HttpPost("{orderId}/cancel")]
 [Authorize(Roles = "Staff,Manager")] // Kẹp Token vào, cho phép cả Staff và Manager hủy đơn
-public async Task<IActionResult> CancelOrder(Guid orderId)
+public async Task<IActionResult> CancelOrder(Guid orderId, [FromBody] CancelOrderRequestDto request)
 {
     try
     {
@@ -102,7 +102,7 @@ public async Task<IActionResult> CancelOrder(Guid orderId)
         }
 
         // 2. Gọi BLL xử lý nghiệp vụ hủy đơn và nhả kho
-        bool result = await _orderService.CancelOrderAsync(orderId, staffId);
+        bool result = await _orderService.CancelOrderAsync(orderId, staffId, request);
         
         if (result)
         {

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
-using CoffeeShop.BLL.DTOs.Inventory.Responses;
 using CoffeeShop.BLL.Interfaces;
 using CoffeeShop.BLL.Services;
 
@@ -16,14 +15,12 @@ namespace CoffeeShop.API.Controllers
     {
         private readonly BruteForceService _bruteForceService;
         private readonly IConfiguration _configuration;
-        //private readonly RecoveryService _recoveryService;
         private readonly OrderService _orderService;
         private readonly IAuthService _authService;
         private readonly ITokenService _tokenService;
         private readonly PasswordHasher _passwordHasher;
         public AuthController(BruteForceService bruteForceService,
         IConfiguration configuration,
-        //RecoveryService recoveryService, 
         OrderService orderService,
         IAuthService authService,
         ITokenService tokenService,
@@ -31,7 +28,6 @@ namespace CoffeeShop.API.Controllers
         {
             _bruteForceService = bruteForceService;
             _configuration = configuration;
-            //_recoveryService = recoveryService;
             _orderService = orderService;
             _authService = authService;
             _tokenService = tokenService;
@@ -71,13 +67,6 @@ namespace CoffeeShop.API.Controllers
                 return BadRequest(new { message = "Đã có lỗi hệ thống xảy ra, vui lòng thử lại sau!" });
             }
         }
-        /*[Authorize(Policy = "AdminOnly")]
-        [HttpPost("register-king")]
-        public IActionResult Register([FormBody] RegisterNow register) {
-            var data = new { message = "...."};
-            return Ok(data);
-        }*/
-        // Hàm logout này tí nữa mình sẽ xử lý
         [HttpPost("logout")]
         [AllowAnonymous] // Ai cũng có quyền bấm đăng xuất
         public IActionResult Logout()
@@ -93,77 +82,6 @@ namespace CoffeeShop.API.Controllers
             // Nếu user chọc được vào đến dòng code này, chứng tỏ Token/Cookie của họ 
 
             return Ok(new { message = "Vé còn hạn, mời sếp ở lại chơi!" });
-        }
-        [HttpPost("verify-backdoor")]
-        public IActionResult VerifyBackdoor([FromBody] string inputKey)
-        {
-            // 1. Lễ tân bốc máy gọi Não Bộ xử lý logic
-            var result = _authService.VerifyBackdoor(inputKey);
-
-            // 2. Não bộ bảo sai -> Đuổi khách
-            if (result == null)
-            {
-                return Unauthorized(new { message = "Sai mã bí mật!" });
-            }
-
-            // 3. Não bộ bảo đúng -> Lễ tân lấy Token cất vào Cookie
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddDays(1)
-            };
-
-            // Nhét token từ result vào bánh quy
-            Response.Cookies.Append("accessToken", result.Token, cookieOptions);
-
-            // 4. Mỉm cười trả kết quả cho Frontend
-            return Ok(new
-            {
-                message = "Cửa ải quản trị đã mở!",
-                data = result
-            });
-        }
-        [HttpPost("forgot-password")]
-        [AllowAnonymous]
-        [EnableRateLimiting("fixed")]
-        public async Task<IActionResult> SendOtp([FromBody] ForgotPasswordRequest request)
-        {
-            // Gọi Service xử lý bất đồng bộ, dùng await để đợi kết quả true/false thật
-            //bool result = await _recoveryService.GenerateAndSendOtpAsync(request.Email);
-
-            // Nếu Service lắc đầu (Email không tồn tại)
-            /*if (!result)
-            {
-                return BadRequest(new { message = "Email này không tồn tại trong hệ thống!" });
-            }*/
-
-            return Ok(new { message = "Mã OTP đã được gửi, vui lòng kiểm tra hòm thư của bạn!" });
-        }
-
-        // ==========================================
-        // NHỊP 2: XÁC THỰC OTP VÀ ĐỔI MẬT KHẨU
-        // ==========================================
-        [HttpPost("reset-password")]
-        [AllowAnonymous]
-        [EnableRateLimiting("fixed")]
-
-        public async Task<IActionResult> RecoveryPassword([FromBody] ResetPasswordRequest request)
-        {
-            // Lưu ý: Chỗ này trước khi gọi Service, em nhớ dùng BCrypt để băm mật khẩu mới ra nhé!
-            string newPasswordHash = _passwordHasher.Hash(request.NewPassword);
-
-            // Gửi dữ liệu xuống Nhịp 2 của Service để kiểm tra chéo với DB
-            //bool result = await _recoveryService.VerifyAndResetPasswordAsync(request.Email, request.OtpCode, newPasswordHash);
-
-            // Nếu Service báo sai mã OTP hoặc mã đã hết hạn
-            /*if (!result)
-            {
-                return BadRequest(new { message = "Mã OTP sai hoặc đã hết hạn sử dụng!" });
-            }*/
-
-            return Ok(new { message = "Đổi mật khẩu thành công! Mời sếp đăng nhập lại." });
         }
     }
 }

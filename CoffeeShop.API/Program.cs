@@ -61,11 +61,9 @@ builder.Services.AddAuthentication(options =>
 // 3. Cấu hình Authorization Service (Phân quyền nâng cao bằng Policy)
 builder.Services.AddAuthorization(options =>
 {
-    // Tạo một Policy tên là "AdminOnly", bắt buộc user phải có Role là "Admin"
     // "Role" là một Claims đặc biệt
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Admin","Manager"));
-    options.AddPolicy("StaffOnly", policy => policy.RequireRole("Admin","Manager","Staff"));
+    options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Manager"));
+    options.AddPolicy("StaffOnly", policy => policy.RequireRole("Manager","Staff"));
 });
 builder.Services.AddRateLimiter(options => 
 {
@@ -133,6 +131,7 @@ builder.Services.AddScoped<StoreInventoryRepository>();
 builder.Services.AddScoped<SystemAuditLogRepository>();
 builder.Services.AddScoped<InventoryRepository>();
 builder.Services.AddScoped<InventoryService>();
+builder.Services.AddScoped<UserProfileService>();
 
 
 // "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"
@@ -147,8 +146,19 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<TokenService>();
 // Đăng ký Repository với vòng đời Scoped (mỗi HTTP Request tạo 1 instance)
 builder.Services.AddScoped<ISystemAuditLogRepository, SystemAuditLogRepository>();
+// Đăng ký Repository (Nếu đệ chưa đăng ký)
+builder.Services.AddScoped<SystemAuditLogRepository>();
 
+// Đăng ký Service mới tinh lúc nãy
+builder.Services.AddScoped<SystemAuditLogService>();
+// 1. Đăng ký cho Repository trước (Vì Service cần Repo để chọc xuống DB)
+builder.Services.AddScoped<ManagerRepository>();
 
+// 2. Sau đó đăng ký cho Service (Vì Controller cần Service để xử lý logic)
+builder.Services.AddScoped<ManagerService>();
+
+builder.Services.AddScoped<ShiftRepository>();
+builder.Services.AddScoped<ShiftService>();
 
 
 
