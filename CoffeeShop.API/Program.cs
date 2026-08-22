@@ -116,7 +116,6 @@ c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
 });
 });
 builder.Services.AddScoped<AccountRepository>();
-builder.Services.AddScoped<EmailService>();
 //builder.Services.AddScoped<RecoveryService>();
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<InventoryRepository>();
