@@ -116,7 +116,6 @@ c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
 });
 });
 builder.Services.AddScoped<AccountRepository>();
-//builder.Services.AddScoped<RecoveryService>();
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<InventoryRepository>();
 builder.Services.AddScoped<OrderService>();
@@ -131,6 +130,8 @@ builder.Services.AddScoped<SystemAuditLogRepository>();
 builder.Services.AddScoped<InventoryRepository>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<UserProfileService>();
+builder.Services.AddScoped<ProductService>();
+
 
 
 // "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"

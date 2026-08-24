@@ -1,35 +1,26 @@
 using Microsoft.AspNetCore.Mvc;
-using CoffeeShop.DAL.Repositories; 
 
 namespace CoffeeShop.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    // [Authorize] 
+    [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
-        private readonly ProductRepository _productRepo;
+        private readonly ProductService _productService; 
 
-        public ProductController(ProductRepository productRepo)
+        public ProductController(ProductService productService)
         {
-            _productRepo = productRepo;
+            _productService = productService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
-            var products = await _productRepo.GetAllProductsWithCategoryAsync();
-            // 2. Định hình lại gói hàng (Flat JSON) để ném ra cho Frontend 
-            var result = products.Select(p => new {
-                id = p.Id,
-                name = p.Name,
-                price = p.Price,
-                image = p.Image,
-                categoryName = p.Category != null ? p.Category.Name : "Chưa phân loại"
-            });
-            return Ok(new { 
+            var menu = await _productService.GetMenuAsync();
+            return Ok(new
+            {
                 message = "Tải menu thành công!",
-                data = result 
+                data = menu
             });
         }
     }

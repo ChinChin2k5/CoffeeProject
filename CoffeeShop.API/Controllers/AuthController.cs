@@ -53,7 +53,7 @@ namespace CoffeeShop.API.Controllers
                     Expires = DateTime.UtcNow.AddDays(1)
                 };
 
-                // Nhét cái VÉ THẬT vào Cookie
+                // Nhét VÉ THẬT vào Cookie
                 Response.Cookies.Append("accessToken", result.Token, cookieOptions);
 
                 return Ok(new
@@ -71,17 +71,15 @@ namespace CoffeeShop.API.Controllers
         [AllowAnonymous] // Ai cũng có quyền bấm đăng xuất
         public IActionResult Logout()
         {
-            // Lệnh cho trình duyệt thủ tiêu cái bánh quy mang tên "accessToken"
+            // Lệnh cho trình duyệt xoá cái bánh quy mang tên "accessToken"
             Response.Cookies.Delete("accessToken");
             return Ok(new { message = "Đăng xuất thành công, đã thu hồi lệnh bài!" });
         }
         [HttpGet("me")]
-        [Authorize] // Tấm khiên cực kỳ quan trọng! Cấm kẻ không có vé (Cookie) được đi qua.
+        [Authorize]         
         public IActionResult GetMe()
         {
-            // Nếu user chọc được vào đến dòng code này, chứng tỏ Token/Cookie của họ 
-
-            return Ok(new { message = "Vé còn hạn, mời sếp ở lại chơi!" });
+            return Ok(new { message = "Vé còn hạn" });
         }
     }
 }
